@@ -17,7 +17,7 @@ public class Main extends Application {
                 + "view" + File.separator + "MainWindow.fxml"));
 
         primaryStage.setTitle("Animal Shelter Manager");
-        primaryStage.setScene(new Scene(root, 1200, 800));
+        primaryStage.setScene(new Scene(root, 800, 450));
         primaryStage.show();
     }
 
