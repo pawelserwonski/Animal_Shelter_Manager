@@ -13,13 +13,10 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<?import javafx.scene.control.CheckBox?>
-<GridPane alignment="TOP_CENTER" prefHeight="450.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.121"
-          xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="ski.serwon.AnimalShelterManager.controller.MainWindowController">
+<?import javafx.scene.control.ChoiceBox?>
+<GridPane alignment="TOP_CENTER" minHeight="450.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ski.serwon.AnimalShelterManager.controller.MainWindowController">
     <children>
-        <TabPane prefHeight="209.0" prefWidth="864.0" tabClosingPolicy="UNAVAILABLE" GridPane.rowIndex="1"
-                 GridPane.vgrow="ALWAYS">
+        <TabPane minHeight="200.0" minWidth="800.0" tabClosingPolicy="UNAVAILABLE" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
             <tabs>
                 <Tab text="Animals">
                     <content>
@@ -34,12 +31,12 @@
                             <top>
                                 <ToolBar BorderPane.alignment="CENTER">
                                     <items>
-                                        <Button mnemonicParsing="false" text="Add"/>
-                                        <Button text="Edit"/>
-                                        <Button text="Delete"/>
-                                        <CheckBox text="Dogs" />
-                                        <CheckBox text="Cats" />
-                                        <CheckBox text="Others" />
+                                        <ChoiceBox fx:id="speciesChoiceBox"/>  <!-- multiple selection choice box for types of animals -->
+
+                                        <Button mnemonicParsing="false" text="Add" />
+                                        <Button text="Edit" />
+                                        <Button text="Delete" />
+
                                     </items>
                                 </ToolBar>
                             </top>
@@ -48,7 +45,7 @@
                 </Tab>
                 <Tab text="Shelter">
                     <content>
-                        <BorderPane/>
+                        <BorderPane />
                     </content>
                 </Tab>
             </tabs>
@@ -57,27 +54,27 @@
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close"/>
+                        <MenuItem mnemonicParsing="false" text="Close" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
+                        <MenuItem mnemonicParsing="false" text="Delete" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
+                        <MenuItem mnemonicParsing="false" text="About" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
     </children>
     <columnConstraints>
-        <ColumnConstraints/>
+        <ColumnConstraints />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints/>
-        <RowConstraints/>
+        <RowConstraints />
+        <RowConstraints />
     </rowConstraints>
 </GridPane>
