@@ -14,6 +14,7 @@ import java.util.List;
 public class Breed {
     private String name;
     private boolean requireWalk;
+    private int id;
 
     public Breed(String name, boolean requireWalk) {
         this.name = name;
@@ -28,16 +29,7 @@ public class Breed {
         return requireWalk;
     }
 
-    public static boolean addBreed(List<Breed> listOfBreeds, String name, boolean requiresWalk) {
-        if (listOfBreeds.stream()
-                .map(Breed::getName)
-                .anyMatch(c -> c.equals(name))) {
-            return false;
-        }
-
-        listOfBreeds.add(new Breed(name, requiresWalk));
-        return true;
+    public int getId() {
+        return id;
     }
-
-
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="ski.serwon.AnimalShelterManager.controller.AddBreedController">
+
+    <content>
+        <GridPane hgap="10" vgap="10">
+            <Label text="Species:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="speciesComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                      minWidth="200"/>
+            <Label text="Name:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="nameTextField" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                       minWidth="200"/>
+            <Label text="Requires walks:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <GridPane vgap="10" hgap="10" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                <fx:define>
+                    <ToggleGroup fx:id="requiresWalksToggleGroup"/>
+                </fx:define>
+                <RadioButton fx:id="noRadioButton" text="No" selected="true" toggleGroup="$requiresWalksToggleGroup"
+                             GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+
+                <RadioButton fx:id="yesRadioButton" text="Yes" toggleGroup="$requiresWalksToggleGroup"
+                             GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            </GridPane>
+        </GridPane>
+    </content>
+
+</DialogPane>

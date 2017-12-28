@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="ski.serwon.AnimalShelterManager.controller.AddSpeciesController">
+
+    <content>
+        <GridPane vgap="10" hgap="10">
+            <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="nameTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="200"/>
+            <Label text="Places limit: " GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Spinner fx:id="placesLimitSpinner" GridPane.rowIndex="1" GridPane.columnIndex="1" minWidth="200"
+                     min="1" initialValue="50" amountToStepBy="5" max="100000000"/>
+        </GridPane>
+    </content>
+</DialogPane>

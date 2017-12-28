@@ -5,7 +5,10 @@ import java.time.LocalDate;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class Animal {
-    private Species species;
+    public enum Sex{male, female}
+
+    private Sex sex;
+    //private Species species;
     private String name;
     private LocalDate birthDate;
     private LocalDate inShelterSince;
@@ -13,21 +16,30 @@ public class Animal {
     private LocalDate lastWalk;
     private int id;
 
-    //private static int lastId -- TODO retrieve last id from database method
 
 
-    public Animal(Species species, String name, LocalDate birthDate, Breed breed) {
-        this.species = species;
+    public Animal(/*Species species, */String name, LocalDate birthDate, Breed breed, Sex sex) {
+//        this.species = species;
         this.name = name;
         this.birthDate = birthDate;
         this.breed = breed;
-
+        this.sex = sex;
 
         this.inShelterSince = LocalDate.now();
         if (breed.doesRequireWalk()) lastWalk = LocalDate.now();
         //id = lastId++;
     }
 
+    public Animal(Sex sex, /*Species species,*/ String name, LocalDate birthDate, LocalDate inShelterSince, Breed breed, LocalDate lastWalk, int id) {
+        this.sex = sex;
+//        this.species = species;
+        this.name = name;
+        this.birthDate = birthDate;
+        this.inShelterSince = inShelterSince;
+        this.breed = breed;
+        this.lastWalk = lastWalk;
+        this.id = id;
+    }
 
     public long daysSinceLastWalked() throws WalkException {
         if (breed.doesRequireWalk()) {
@@ -37,5 +49,31 @@ public class Animal {
         }
     }
 
+    public Sex getSex() {
+        return sex;
+    }
 
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public LocalDate getInShelterSince() {
+        return inShelterSince;
+    }
+
+    public Breed getBreed() {
+        return breed;
+    }
+
+    public LocalDate getLastWalk() {
+        return lastWalk;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

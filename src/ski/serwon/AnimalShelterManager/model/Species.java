@@ -7,6 +7,7 @@ public class Species {
 
     private String name;
     private int placesLimit;
+    private int id;
     private List<Breed> breeds;
 
     public boolean addBreed(String name, boolean requireWalks) {
@@ -16,5 +17,17 @@ public class Species {
     public Species(String name, int placesLimit) {
         this.name = name;
         this.placesLimit = placesLimit;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPlacesLimit() {
+        return placesLimit;
+    }
+
+    public int getId() {
+        return id;
     }
 }

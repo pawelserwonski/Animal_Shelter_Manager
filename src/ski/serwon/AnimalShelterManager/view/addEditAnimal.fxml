@@ -10,17 +10,29 @@
             fx:controller="ski.serwon.AnimalShelterManager.controller.addEditAnimalController">
 
     <headerText>
-        Fill in the fields below
+        Fill in information below
     </headerText>
 
     <content>
         <GridPane vgap="10" hgap="10">
-            <Label text="Breed:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="breedComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="200"/>
-            <Label text="Date of birth:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="birthDate" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-
+            <Label text="Species:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="speciesComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="200"/>
+            <Label text="Breed:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="breedComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" minWidth="200"/>
+            <Label text="Date of birth:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="birthDate" GridPane.rowIndex="2" GridPane.columnIndex="1" minWidth="200"/>
+            <Label text="Name:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="nameTextField" GridPane.rowIndex="3" GridPane.columnIndex="1" minWidth="200" />
+            <Label text="Sex:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <GridPane vgap="10" hgap="10" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                <fx:define>
+                    <ToggleGroup fx:id="sexToggleGroup"/>
+                </fx:define>
+                <RadioButton fx:id="femaleRadioButton" text="Female" GridPane.rowIndex="0"
+                             GridPane.columnIndex="0" toggleGroup="$sexToggleGroup"/>
+                <RadioButton fx:id="maleRadioButton" text="Male" GridPane.rowIndex="0"
+                             GridPane.columnIndex="1" toggleGroup="$sexToggleGroup"/>
+            </GridPane>
         </GridPane>
     </content>
-
 </DialogPane>
