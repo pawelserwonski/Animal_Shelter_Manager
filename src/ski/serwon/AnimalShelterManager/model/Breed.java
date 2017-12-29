@@ -3,9 +3,6 @@ package ski.serwon.AnimalShelterManager.model;
 import java.util.List;
 
 /**
- * Class represents either species in case of 'other' (undefined)
- * animal or more accurately breed in case of one of defined type
- * of animal.
  *
  * @author Paweł Serwoński
  * @version 1.0
@@ -16,9 +13,10 @@ public class Breed {
     private boolean requireWalk;
     private int id;
 
-    public Breed(String name, boolean requireWalk) {
+    public Breed(String name, boolean requireWalk, int id) {
         this.name = name;
         this.requireWalk = requireWalk;
+        this.id = id;
     }
 
     public String getName() {

@@ -1,22 +1,27 @@
 package ski.serwon.AnimalShelterManager.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import ski.serwon.AnimalShelterManager.model.datamodel.BreedDatabase;
+
 import java.util.List;
 
 public class Species {
-    public static List<Species> speciesList; //TODO - create species list in database and retrieve it
-
     private String name;
     private int placesLimit;
     private int id;
-    private List<Breed> breeds;
+    private ObservableList<Breed> breeds;
 
     public boolean addBreed(String name, boolean requireWalks) {
-        return Breed.addBreed(breeds, name, requireWalks);
+        return BreedDatabase.getInstance().addBreedToSpecies(this, name, requireWalks);
     }
 
-    public Species(String name, int placesLimit) {
+    public Species(int id, String name, int placesLimit) {
+        this.id = id;
         this.name = name;
         this.placesLimit = placesLimit;
+        this.breeds = FXCollections.observableArrayList
+                (BreedDatabase.getInstance().getBreedsOfSpecifiedSpecies(this));
     }
 
     public String getName() {
@@ -29,5 +34,13 @@ public class Species {
 
     public int getId() {
         return id;
+    }
+
+    public ObservableList<Breed> getBreeds() {
+        return breeds;
+    }
+
+    public void setPlacesLimit(int placesLimit) {
+        this.placesLimit = placesLimit;
     }
 }

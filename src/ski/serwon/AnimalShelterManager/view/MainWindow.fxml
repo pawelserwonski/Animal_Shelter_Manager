@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -13,17 +14,21 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<?import javafx.scene.control.ChoiceBox?>
-<GridPane alignment="TOP_CENTER" minHeight="450.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ski.serwon.AnimalShelterManager.controller.MainWindowController">
+<?import javafx.scene.control.Label?>
+<GridPane alignment="TOP_CENTER" minHeight="450.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.121"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:id="mainGridPane"
+          fx:controller="ski.serwon.AnimalShelterManager.controller.MainWindowController">
     <children>
-        <TabPane minHeight="200.0" minWidth="800.0" tabClosingPolicy="UNAVAILABLE" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+        <TabPane minHeight="200.0" minWidth="800.0" tabClosingPolicy="UNAVAILABLE" GridPane.rowIndex="1"
+                 GridPane.vgrow="ALWAYS">
             <tabs>
                 <Tab text="Animals">
                     <content>
                         <BorderPane>
                             <left>
-                                <ListView>
-                                </ListView>
+                                <ListView fx:id="animalsListView"/>
+
                             </left>
                             <center>
 
@@ -31,11 +36,12 @@
                             <top>
                                 <ToolBar BorderPane.alignment="CENTER">
                                     <items>
-                                        <ChoiceBox fx:id="speciesChoiceBox"/>  <!-- multiple selection choice box for types of animals -->
+                                        <ChoiceBox fx:id="speciesChoiceBox"
+                                                   minWidth="200"/>  <!-- multiple selection choice box for types of animals -->
 
-                                        <Button mnemonicParsing="false" text="Add" />
-                                        <Button text="Edit" />
-                                        <Button text="Delete" />
+                                        <Button mnemonicParsing="false" text="Add"/>
+                                        <Button text="Edit"/>
+                                        <Button text="Delete"/>
 
                                     </items>
                                 </ToolBar>
@@ -43,9 +49,24 @@
                         </BorderPane>
                     </content>
                 </Tab>
-                <Tab text="Shelter">
+                <Tab text="Species and Breeds">
                     <content>
-                        <BorderPane />
+                        <GridPane vgap="10" hgap="100">
+
+                            <Label text="Species:" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <ListView fx:id="speciesListView" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                                    onAction="#showNewSpeciesDialog"/>
+                            <Button text="Edit limit" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+
+                            <Label text="Breeds:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <ListView fx:id="breedsListView" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                            <Button text="Edit" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+
+
+                        </GridPane>
                     </content>
                 </Tab>
             </tabs>
@@ -54,27 +75,27 @@
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem mnemonicParsing="false" text="Close"/>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
+                        <MenuItem mnemonicParsing="false" text="Delete"/>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="About" />
+                        <MenuItem mnemonicParsing="false" text="About"/>
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
     </children>
     <columnConstraints>
-        <ColumnConstraints />
+        <ColumnConstraints/>
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints />
-        <RowConstraints />
+        <RowConstraints/>
+        <RowConstraints/>
     </rowConstraints>
 </GridPane>

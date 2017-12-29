@@ -1,24 +1,28 @@
 package ski.serwon.AnimalShelterManager.model.datamodel;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import ski.serwon.AnimalShelterManager.model.Animal;
 import ski.serwon.AnimalShelterManager.model.Breed;
 import ski.serwon.AnimalShelterManager.model.Species;
 
-import javax.xml.crypto.Data;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
 
 public class AnimalDatabase {
-    private static int lastUsedId;
+    private int lastUsedId; // TODO check if works
     private static AnimalDatabase instance = new AnimalDatabase();
 
-    private List<Animal> animals;
+    private ObservableList<Animal> animals;
 
     private AnimalDatabase() {
-        animals = new LinkedList<>();
+        animals = FXCollections.observableList(getAllAnimalsFromDatabase());
         lastUsedId = getLastAnimalId();
     }
 
@@ -64,6 +68,9 @@ public class AnimalDatabase {
 
     public static final String COUNT_ALL_ANIMALS = "SELECT COUNT(*) FROM " + Database.TABLE_ANIMALS;
 
+    public static final String SELECT_MAX_USED_ID = "SELECT MAX(" + Database.ANIMALS_COLUMN_ID + ") "
+            + "FROM " + Database.TABLE_ANIMALS;
+
     public static List<Animal> getAllAnimalsFromDatabase() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -84,17 +91,17 @@ public class AnimalDatabase {
                 int breedId = resultSet.getInt(breedColumn);
                 Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
                 String name = resultSet.getString(nameColumn);
-                Animal.Sex sex = resultSet.getString(sexColumn).toLowerCase().equals("m") ? Animal.Sex.male : Animal.Sex.female;
-                LocalDate birthDate = resultSet.getDate(birthDateColumn).toLocalDate();
-                LocalDate inShelterSince = resultSet.getDate(inShelterSinceColumn).toLocalDate();
-                LocalDate lastWalk = resultSet.getDate(lastWalkColumn).toLocalDate();
+                Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
+                LocalDate birthDate = LocalDate.parse(resultSet.getString(birthDateColumn));
+                LocalDate inShelterSince = LocalDate.parse(resultSet.getString(inShelterSinceColumn));
+                LocalDate lastWalk = LocalDate.parse(resultSet.getString(lastWalkColumn));
                 toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
             }
 
             return toReturn;
         } catch (SQLException e) {
-            //TODO
-            return null;
+            e.printStackTrace();
+            return new LinkedList<>();
         }
     }
 
@@ -120,7 +127,7 @@ public class AnimalDatabase {
                 int breedId = resultSet.getInt(breedColumn);
                 Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
                 String name = resultSet.getString(nameColumn);
-                Animal.Sex sex = resultSet.getString(sexColumn).toLowerCase().equals("m") ? Animal.Sex.male : Animal.Sex.female;
+                Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
                 LocalDate birthDate = resultSet.getDate(birthDateColumn).toLocalDate();
                 LocalDate inShelterSince = resultSet.getDate(inShelterSinceColumn).toLocalDate();
                 LocalDate lastWalk = resultSet.getDate(lastWalkColumn).toLocalDate();
@@ -131,7 +138,7 @@ public class AnimalDatabase {
 
         } catch (SQLException e) {
             //todo
-            return null;
+            return new LinkedList<>();
         } finally {
             try {
                 if (resultSet != null) {
@@ -162,9 +169,9 @@ public class AnimalDatabase {
             while (resultSet.next()) {
                 int id = resultSet.getInt(idColumn);
                 int breedId = resultSet.getInt(breedColumn);
-                Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
+//                Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
                 String name = resultSet.getString(nameColumn);
-                Animal.Sex sex = resultSet.getString(sexColumn).toLowerCase().equals("m") ? Animal.Sex.male : Animal.Sex.female;
+                Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
                 LocalDate birthDate = resultSet.getDate(birthDateColumn).toLocalDate();
                 LocalDate inShelterSince = resultSet.getDate(inShelterSinceColumn).toLocalDate();
                 LocalDate lastWalk = resultSet.getDate(lastWalkColumn).toLocalDate();
@@ -175,7 +182,7 @@ public class AnimalDatabase {
 
         } catch (SQLException e) {
             //todo
-            return null;
+            return new LinkedList<>();
         } finally {
             try {
                 if (resultSet != null) {
@@ -192,27 +199,64 @@ public class AnimalDatabase {
 
             preparedStatement.setInt(1, animal.getBreed().getId());
             preparedStatement.setString(2, animal.getName());
-            preparedStatement.setString(3, animal.getSex() == Animal.Sex.male ? "m" : "f");
+            preparedStatement.setString(3, animal.getSex().toString());
             preparedStatement.setDate(4, Date.valueOf(animal.getBirthDate()));
             preparedStatement.setDate(5, Date.valueOf(animal.getInShelterSince()));
             preparedStatement.setDate(6, Date.valueOf(animal.getLastWalk()));
 
-            preparedStatement.execute();
-            return true;
+            return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
             //todo
             return false;
         }
     }
-//
-//    public static final String INSERT_NEW_ANIMAL = "INSERT INTO " + Database.TABLE_ANIMALS + "(" +
-//            Database.ANIMALS_COLUMN_BREED + ", "
-//            + Database.ANIMALS_COLUMN_NAME + ", "
-//            + Database.ANIMALS_COLUMN_SEX + ", "
-//            + Database.ANIMALS_COLUMN_BIRTHDATE + ", "
-//            + Database.ANIMALS_COLUMN_IN_SHELTER_SINCE + ", "
-//            + Database.ANIMALS_COLUMN_LAST_WALK
-//            + ") VALUES(?, ?, ?, ?, ?, ?)";
+
+    public boolean updateExistingAnimal(Animal updatedAnimal) {
+        try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_ANIMAL)) {
+
+            preparedStatement.setInt(1, updatedAnimal.getBreed().getId());
+            preparedStatement.setString(2, updatedAnimal.getName());
+            preparedStatement.setString(3, updatedAnimal.getSex().toString());
+            preparedStatement.setDate(4, Date.valueOf(updatedAnimal.getBirthDate()));
+            preparedStatement.setDate(5, Date.valueOf(updatedAnimal.getInShelterSince()));
+            preparedStatement.setInt(6, updatedAnimal.getId());
+
+            return preparedStatement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            //todo
+            return false;
+        }
+    }
+
+    public boolean removeAnimal(Animal animalToRemove) {
+        try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
+             PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_ANIMAL)) {
+
+            preparedStatement.setInt(1, animalToRemove.getId());
+
+            return preparedStatement.executeUpdate() == 1;
+        } catch (SQLException e) {
+            //todo
+            return false;
+        }
+    }
+
+    public boolean updateLaskWalkDate(LocalDate updatedDate, Animal walkedAnimal) {
+        try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
+        PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LAST_WALK)) {
+
+            preparedStatement.setDate(1, Date.valueOf(updatedDate));
+            preparedStatement.setInt(2, walkedAnimal.getId());
+
+            return preparedStatement.executeUpdate() == 1;
+
+        } catch (SQLException e) {
+            //todo
+            return false;
+        }
+    }
+
 
     public int countAnimals() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
@@ -227,6 +271,7 @@ public class AnimalDatabase {
 
         } catch (SQLException e) {
             //todo -- handle SQLException
+            return -1;
         }
 
     }
@@ -234,11 +279,10 @@ public class AnimalDatabase {
     public int getLastAnimalId() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(SELECT_ALL_ANIMALS_FROM_DATABASE)) {
+             ResultSet resultSet = statement.executeQuery(SELECT_MAX_USED_ID)) {
 
-            int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
-            if (resultSet.last()) {
-                return resultSet.getInt(idColumn);
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
             } else {
                 return -2;
             }
@@ -252,7 +296,17 @@ public class AnimalDatabase {
         return instance;
     }
 
-    public List<Animal> getAnimals() {
+    public ObservableList<Animal> getAnimals() {
         return animals;
+    }
+
+    public boolean addAnimal(Animal.Sex sex, String name, LocalDate birthDate, Breed breed) {
+        LocalDate inShelterSince = LocalDate.now();
+        LocalDate lastWalk = breed.doesRequireWalk() ? LocalDate.now() : null;
+        int animalID = ++lastUsedId;
+
+        Animal newAnimal = new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, animalID);
+
+        return animals.add(newAnimal) && insertNewAnimal(newAnimal);
     }
 }

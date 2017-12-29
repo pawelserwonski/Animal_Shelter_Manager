@@ -5,7 +5,8 @@ import java.sql.Connection;
 
 public class Database {
     public static final String DB_NAME = "database.db";
-    public static final String CONNECTION_STRING = "jdbc:sqlite:." + File.separator + "data" + File.separator + DB_NAME;
+    public static final String CONNECTION_STRING = "jdbc:sqlite:." + File.separator
+            + "data" + File.separator + DB_NAME;
 
 
     public static final String TABLE_ANIMALS = "animals";
@@ -28,7 +29,7 @@ public class Database {
     public static final String TABLE_SPECIES = "species";
     public static final String SPECIES_COLUMN_ID = "_id";
     public static final String SPECIES_COLUMN_NAME = "name";
-    public static final String SPECIES_COLUMN_LIMIT = "limit";
+    public static final String SPECIES_COLUMN_LIMIT = "placesLimit";
 
 
 }

@@ -5,7 +5,17 @@ import java.time.LocalDate;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class Animal {
-    public enum Sex{male, female}
+    public enum Sex{male, female;
+
+        @Override
+        public String toString() {
+            return this.equals(male) ? "m" : "f";
+        }
+
+        public static Sex getSexFromString(String sex) {
+            return sex.toLowerCase().equals("m") ? male : female;
+        }
+    }
 
     private Sex sex;
     //private Species species;
@@ -18,17 +28,17 @@ public class Animal {
 
 
 
-    public Animal(/*Species species, */String name, LocalDate birthDate, Breed breed, Sex sex) {
-//        this.species = species;
-        this.name = name;
-        this.birthDate = birthDate;
-        this.breed = breed;
-        this.sex = sex;
-
-        this.inShelterSince = LocalDate.now();
-        if (breed.doesRequireWalk()) lastWalk = LocalDate.now();
-        //id = lastId++;
-    }
+//    public Animal(/*Species species, */String name, LocalDate birthDate, Breed breed, Sex sex) {
+////        this.species = species;
+//        this.name = name;
+//        this.birthDate = birthDate;
+//        this.breed = breed;
+//        this.sex = sex;
+//
+//        this.inShelterSince = LocalDate.now();
+//        if (breed.doesRequireWalk()) lastWalk = LocalDate.now();
+//        //id = lastId++;
+//    }
 
     public Animal(Sex sex, /*Species species,*/ String name, LocalDate birthDate, LocalDate inShelterSince, Breed breed, LocalDate lastWalk, int id) {
         this.sex = sex;
@@ -52,6 +62,7 @@ public class Animal {
     public Sex getSex() {
         return sex;
     }
+
 
     public String getName() {
         return name;
