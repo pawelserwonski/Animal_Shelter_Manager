@@ -41,32 +41,38 @@ public class BreedDatabase {
     public static final String SELECT_MAX_USED_ID = "SELECT MAX(" + Database.BREEDS_COLUMN_ID + ") "
             + "FROM " + Database.TABLE_BREEDS;
 
+    public static final String UPDATE_EXISTING_BREED = "UPDATE " + Database.TABLE_BREEDS
+            + " SET " + Database.BREEDS_COLUMN_REQUIRE_WALKS + " = ? WHERE "
+            + Database.BREEDS_COLUMN_ID + " = ?";
+
     public List<Breed> getBreedsOfSpecifiedSpecies(Species species) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement(SELECT_BREEDS_OF_SPECIFIED_SPECIES)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BREEDS_OF_SPECIFIED_SPECIES)) {
 
             preparedStatement.setInt(1, species.getId());
             ResultSet resultSet = preparedStatement.executeQuery();
-
-            int idColumn = resultSet.findColumn(Database.BREEDS_COLUMN_ID);
-            int nameColumn = resultSet.findColumn(Database.BREEDS_COLUMN_NAME);
-            int requireWalksColumn = resultSet.findColumn(Database.BREEDS_COLUMN_REQUIRE_WALKS);
-
             List<Breed> toReturn = new LinkedList<>();
-            while (resultSet.next()) {
-                String name = resultSet.getString(nameColumn);
-                int id = resultSet.getInt(idColumn);
-                boolean requireWalks = resultSet.getBoolean(requireWalksColumn);
 
-                toReturn.add(new Breed(name, requireWalks, id));
+            if (resultSet.next()) {
+                int idColumn = resultSet.findColumn(Database.BREEDS_COLUMN_ID);
+                int nameColumn = resultSet.findColumn(Database.BREEDS_COLUMN_NAME);
+                int requireWalksColumn = resultSet.findColumn(Database.BREEDS_COLUMN_REQUIRE_WALKS);
+
+
+                do {
+                    String name = resultSet.getString(nameColumn);
+                    int id = resultSet.getInt(idColumn);
+                    boolean requireWalks = resultSet.getBoolean(requireWalksColumn);
+
+                    toReturn.add(new Breed(name, requireWalks, id));
+                } while (resultSet.next());
             }
 
             return toReturn;
 
         } catch (SQLException e) {
             //todo
-            return null;
+            return new LinkedList<>();
         }
     }
 
@@ -75,18 +81,21 @@ public class BreedDatabase {
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(SELECT_ALL_BREEDS)) {
 
-            int idColumn = resultSet.findColumn(Database.BREEDS_COLUMN_ID);
-            int nameColumn = resultSet.findColumn(Database.BREEDS_COLUMN_NAME);
-            int requireWalksColumn = resultSet.findColumn(Database.BREEDS_COLUMN_REQUIRE_WALKS);
-
             List<Breed> toReturn = new LinkedList<>();
 
-            while (resultSet.next()) {
-                String name = resultSet.getString(nameColumn);
-                int id = resultSet.getInt(idColumn);
-                boolean requireWalks = resultSet.getBoolean(requireWalksColumn);
+            if (resultSet.next()) {
+                int idColumn = resultSet.findColumn(Database.BREEDS_COLUMN_ID);
+                int nameColumn = resultSet.findColumn(Database.BREEDS_COLUMN_NAME);
+                int requireWalksColumn = resultSet.findColumn(Database.BREEDS_COLUMN_REQUIRE_WALKS);
 
-                toReturn.add(new Breed(name, requireWalks, id));
+
+                do {
+                    String name = resultSet.getString(nameColumn);
+                    int id = resultSet.getInt(idColumn);
+                    boolean requireWalks = resultSet.getBoolean(requireWalksColumn);
+
+                    toReturn.add(new Breed(name, requireWalks, id));
+                } while (resultSet.next());
             }
 
             return toReturn;
@@ -192,6 +201,26 @@ public class BreedDatabase {
             return toReturn.get();
         } else {
             return null;
+        }
+    }
+
+    public boolean editBreed(Breed breed, boolean doesRequireWalk) {
+        if (updateExistingBreed(doesRequireWalk, breed.getId())) {
+            breed.setRequireWalk(doesRequireWalk);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean updateExistingBreed(boolean requiresWalk, int id) {
+        try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
+        PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_BREED)) {
+            preparedStatement.setBoolean(1, requiresWalk);
+            preparedStatement.setInt(2, id);
+
+            return preparedStatement.executeUpdate() == 1;
+        } catch (SQLException e) {
+           return false;
         }
     }
 }

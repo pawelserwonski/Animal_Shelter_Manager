@@ -15,7 +15,7 @@
             <TextField fx:id="nameTextField" GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="200"/>
             <Label text="Places limit: " GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <Spinner fx:id="placesLimitSpinner" GridPane.rowIndex="1" GridPane.columnIndex="1" minWidth="200"
-                     min="1" initialValue="50" amountToStepBy="5" max="100000000"/>
+                     min="1" initialValue="50" amountToStepBy="5" max="100000000" editable="true"/>
         </GridPane>
     </content>
 </DialogPane>

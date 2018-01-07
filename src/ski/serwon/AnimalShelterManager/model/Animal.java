@@ -15,6 +15,8 @@ public class Animal {
         public static Sex getSexFromString(String sex) {
             return sex.toLowerCase().equals("m") ? male : female;
         }
+
+        public String getFullNameOfSex() { return this.equals(male) ? "Male" : "Female";}
     }
 
     private Sex sex;

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <DialogPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ski.serwon.AnimalShelterManager.controller.addEditAnimalController">
+            fx:controller="ski.serwon.AnimalShelterManager.controller.AddEditAnimalController">
 
     <headerText>
         Fill in information below
@@ -16,11 +16,12 @@
     <content>
         <GridPane vgap="10" hgap="10">
             <Label text="Species:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="speciesComboBox" GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="200"/>
+            <ComboBox fx:id="speciesComboBox" onAction="#populateBreedComboBox"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="200"/>
             <Label text="Breed:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
             <ComboBox fx:id="breedComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1" minWidth="200"/>
             <Label text="Date of birth:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <DatePicker fx:id="birthDate" GridPane.rowIndex="2" GridPane.columnIndex="1" minWidth="200"/>
+            <DatePicker fx:id="birthDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" minWidth="200"/>
             <Label text="Name:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
             <TextField fx:id="nameTextField" GridPane.rowIndex="3" GridPane.columnIndex="1" minWidth="200" />
             <Label text="Sex:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>

@@ -29,7 +29,7 @@ public class AnimalDatabase {
     public static final String SELECT_ALL_ANIMALS_FROM_DATABASE = "SELECT * FROM " + Database.TABLE_ANIMALS;
 
     public static final String SELECT_ANIMALS_OF_SPECIFIED_SPECIES = "SELECT * FROM " + Database.TABLE_ANIMALS
-            + "JOIN " + Database.TABLE_BREEDS + " ON " + Database.TABLE_ANIMALS + "."
+            + " JOIN " + Database.TABLE_BREEDS + " ON " + Database.TABLE_ANIMALS + "."
             + Database.ANIMALS_COLUMN_BREED + " = " + Database.TABLE_BREEDS + "."
             + Database.BREEDS_COLUMN_ID + " JOIN " + Database.TABLE_SPECIES + " ON "
             + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_SPECIES + " = "
@@ -37,7 +37,7 @@ public class AnimalDatabase {
             + Database.TABLE_SPECIES + "." + Database.SPECIES_COLUMN_ID + " = ?";
 
     public static final String SELECT_ANIMALS_OF_SPECIFIED_BREED = "SELECT * FROM "
-            + Database.TABLE_ANIMALS + "JOIN " + Database.TABLE_BREEDS
+            + Database.TABLE_ANIMALS + " JOIN " + Database.TABLE_BREEDS
             + " ON " + Database.TABLE_ANIMALS + "." + Database.ANIMALS_COLUMN_BREED
             + " = " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID
             + " WHERE " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID + " = ?";
@@ -78,24 +78,31 @@ public class AnimalDatabase {
 
             List<Animal> toReturn = new LinkedList<>();
 
-            int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
-            int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
-            int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
-            int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
-            int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
-            int inShelterSinceColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_IN_SHELTER_SINCE);
-            int lastWalkColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_LAST_WALK);
+            if (resultSet.next()) {
+                int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
+                int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
+                int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
+                int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
+                int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
+                int inShelterSinceColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_IN_SHELTER_SINCE);
+                int lastWalkColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_LAST_WALK);
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt(idColumn);
-                int breedId = resultSet.getInt(breedColumn);
-                Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
-                String name = resultSet.getString(nameColumn);
-                Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
-                LocalDate birthDate = LocalDate.parse(resultSet.getString(birthDateColumn));
-                LocalDate inShelterSince = LocalDate.parse(resultSet.getString(inShelterSinceColumn));
-                LocalDate lastWalk = LocalDate.parse(resultSet.getString(lastWalkColumn));
-                toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
+                do {
+                    int id = resultSet.getInt(idColumn);
+                    int breedId = resultSet.getInt(breedColumn);
+                    Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
+                    String name = resultSet.getString(nameColumn);
+                    Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
+                    LocalDate birthDate = LocalDate.parse(resultSet.getString(birthDateColumn));
+                    LocalDate inShelterSince = LocalDate.parse(resultSet.getString(inShelterSinceColumn));
+                    LocalDate lastWalk;
+                    try {
+                        lastWalk = LocalDate.parse(resultSet.getString(lastWalkColumn));
+                    } catch (NullPointerException e) {
+                        lastWalk = null;
+                    }
+                    toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
+                } while (resultSet.next());
             }
 
             return toReturn;
@@ -114,24 +121,31 @@ public class AnimalDatabase {
             resultSet = preparedStatement.executeQuery();
             List<Animal> toReturn = new LinkedList<>();
 
-            int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
-            int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
-            int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
-            int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
-            int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
-            int inShelterSinceColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_IN_SHELTER_SINCE);
-            int lastWalkColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_LAST_WALK);
+            if (resultSet.next()) {
+                int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
+                int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
+                int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
+                int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
+                int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
+                int inShelterSinceColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_IN_SHELTER_SINCE);
+                int lastWalkColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_LAST_WALK);
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt(idColumn);
-                int breedId = resultSet.getInt(breedColumn);
-                Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
-                String name = resultSet.getString(nameColumn);
-                Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
-                LocalDate birthDate = resultSet.getDate(birthDateColumn).toLocalDate();
-                LocalDate inShelterSince = resultSet.getDate(inShelterSinceColumn).toLocalDate();
-                LocalDate lastWalk = resultSet.getDate(lastWalkColumn).toLocalDate();
-                toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
+                do {
+                    int id = resultSet.getInt(idColumn);
+                    int breedId = resultSet.getInt(breedColumn);
+                    Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
+                    String name = resultSet.getString(nameColumn);
+                    Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
+                    LocalDate birthDate = LocalDate.parse(resultSet.getString(birthDateColumn));
+                    LocalDate inShelterSince = LocalDate.parse(resultSet.getString(inShelterSinceColumn));
+                    LocalDate lastWalk;
+                    try {
+                        lastWalk = LocalDate.parse(resultSet.getString(lastWalkColumn));
+                    } catch (NullPointerException e) {
+                        lastWalk = null;
+                    }
+                    toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
+                } while (resultSet.next());
             }
 
             return toReturn;
@@ -158,24 +172,32 @@ public class AnimalDatabase {
             resultSet = preparedStatement.executeQuery();
             List<Animal> toReturn = new LinkedList<>();
 
-            int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
-            int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
-            int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
-            int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
-            int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
-            int inShelterSinceColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_IN_SHELTER_SINCE);
-            int lastWalkColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_LAST_WALK);
+            if (resultSet.next()) {
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt(idColumn);
-                int breedId = resultSet.getInt(breedColumn);
-//                Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
-                String name = resultSet.getString(nameColumn);
-                Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
-                LocalDate birthDate = resultSet.getDate(birthDateColumn).toLocalDate();
-                LocalDate inShelterSince = resultSet.getDate(inShelterSinceColumn).toLocalDate();
-                LocalDate lastWalk = resultSet.getDate(lastWalkColumn).toLocalDate();
-                toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
+                int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
+//                int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
+                int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
+                int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
+                int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
+                int inShelterSinceColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_IN_SHELTER_SINCE);
+                int lastWalkColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_LAST_WALK);
+
+                do {
+                    int id = resultSet.getInt(idColumn);
+//                    int breedId = resultSet.getInt(breedColumn);
+//                    Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
+                    String name = resultSet.getString(nameColumn);
+                    Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
+                    LocalDate birthDate = LocalDate.parse(resultSet.getString(birthDateColumn));
+                    LocalDate inShelterSince = LocalDate.parse(resultSet.getString(inShelterSinceColumn));
+                    LocalDate lastWalk;
+                    try {
+                        lastWalk = LocalDate.parse(resultSet.getString(lastWalkColumn));
+                    } catch (NullPointerException e) {
+                        lastWalk = null;
+                    }
+                    toReturn.add(new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, id));
+                } while (resultSet.next());
             }
 
             return toReturn;
@@ -193,16 +215,20 @@ public class AnimalDatabase {
         }
     }
 
-    public boolean insertNewAnimal(Animal animal) {
+    private boolean insertNewAnimal(Animal animal) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_NEW_ANIMAL)) {
 
             preparedStatement.setInt(1, animal.getBreed().getId());
             preparedStatement.setString(2, animal.getName());
             preparedStatement.setString(3, animal.getSex().toString());
-            preparedStatement.setDate(4, Date.valueOf(animal.getBirthDate()));
-            preparedStatement.setDate(5, Date.valueOf(animal.getInShelterSince()));
-            preparedStatement.setDate(6, Date.valueOf(animal.getLastWalk()));
+            preparedStatement.setString(4, animal.getBirthDate().toString());
+            preparedStatement.setString(5, animal.getInShelterSince().toString());
+            try {
+                preparedStatement.setString(6, animal.getLastWalk().toString());
+            } catch (NullPointerException e) {
+                preparedStatement.setDate(6, null);
+            }
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
@@ -215,12 +241,17 @@ public class AnimalDatabase {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_ANIMAL)) {
 
-            preparedStatement.setInt(1, updatedAnimal.getBreed().getId());
-            preparedStatement.setString(2, updatedAnimal.getName());
-            preparedStatement.setString(3, updatedAnimal.getSex().toString());
-            preparedStatement.setDate(4, Date.valueOf(updatedAnimal.getBirthDate()));
-            preparedStatement.setDate(5, Date.valueOf(updatedAnimal.getInShelterSince()));
-            preparedStatement.setInt(6, updatedAnimal.getId());
+            preparedStatement.setString(1, updatedAnimal.getName());
+            preparedStatement.setString(2, updatedAnimal.getSex().toString());
+            preparedStatement.setString(3, updatedAnimal.getBirthDate().toString());
+            preparedStatement.setString(4, updatedAnimal.getInShelterSince().toString());
+            try {
+                preparedStatement.setString(5, updatedAnimal.getLastWalk().toString());
+            } catch (NullPointerException e) {
+                preparedStatement.setDate(5, null);
+            }
+
+            preparedStatement.setInt(6, updatedAnimal.getBreed().getId());
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
@@ -246,7 +277,7 @@ public class AnimalDatabase {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
         PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LAST_WALK)) {
 
-            preparedStatement.setDate(1, Date.valueOf(updatedDate));
+            preparedStatement.setString(1, updatedDate.toString());
             preparedStatement.setInt(2, walkedAnimal.getId());
 
             return preparedStatement.executeUpdate() == 1;
@@ -306,7 +337,6 @@ public class AnimalDatabase {
         int animalID = ++lastUsedId;
 
         Animal newAnimal = new Animal(sex, name, birthDate, inShelterSince, breed, lastWalk, animalID);
-
-        return animals.add(newAnimal) && insertNewAnimal(newAnimal);
+        return insertNewAnimal(newAnimal) && animals.add(newAnimal);
     }
 }

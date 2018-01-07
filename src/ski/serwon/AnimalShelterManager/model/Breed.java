@@ -30,4 +30,8 @@ public class Breed {
     public int getId() {
         return id;
     }
+
+    public void setRequireWalk(boolean requireWalk) {
+        this.requireWalk = requireWalk;
+    }
 }

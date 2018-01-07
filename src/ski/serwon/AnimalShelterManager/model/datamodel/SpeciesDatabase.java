@@ -15,7 +15,6 @@ public class SpeciesDatabase {
     private ObservableList<Species> speciesList;
 
 
-
     public SpeciesDatabase() {
         lastUsedId = selectLastUsedId();
         speciesList = FXCollections.observableList(selectAllSpecies());
@@ -29,7 +28,7 @@ public class SpeciesDatabase {
             + ") VALUES (?, ?)";
 
     public static final String UPDATE_LIMITS = "UPDATE " + Database.TABLE_SPECIES
-            + "SET " + Database.SPECIES_COLUMN_LIMIT + " = ? "
+            + " SET " + Database.SPECIES_COLUMN_LIMIT + " = ? "
             + "WHERE " + Database.SPECIES_COLUMN_ID + " = ?";
 
     public static final String COUNT_ALL_SPECIES = "SELECT COUNT(*) FROM " + Database.TABLE_SPECIES;
@@ -47,16 +46,18 @@ public class SpeciesDatabase {
              ResultSet resultSet = statement.executeQuery(SELECT_ALL_SPECIES)) {
 
             List<Species> toReturn = new LinkedList<>();
-            int idColumn = resultSet.findColumn(Database.SPECIES_COLUMN_ID);
-            int nameColumn = resultSet.findColumn(Database.SPECIES_COLUMN_NAME);
-            int limitColumn = resultSet.findColumn(Database.SPECIES_COLUMN_LIMIT);
+            if (resultSet.next()) {
+                int idColumn = resultSet.findColumn(Database.SPECIES_COLUMN_ID);
+                int nameColumn = resultSet.findColumn(Database.SPECIES_COLUMN_NAME);
+                int limitColumn = resultSet.findColumn(Database.SPECIES_COLUMN_LIMIT);
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt(idColumn);
-                String name = resultSet.getString(nameColumn);
-                int limit = resultSet.getInt(limitColumn);
+                do {
+                    int id = resultSet.getInt(idColumn);
+                    String name = resultSet.getString(nameColumn);
+                    int limit = resultSet.getInt(limitColumn);
 
-                toReturn.add(new Species(id, name, limit));
+                    toReturn.add(new Species(id, name, limit));
+                } while (resultSet.next());
             }
 
             return toReturn;
@@ -85,7 +86,7 @@ public class SpeciesDatabase {
     }
 
     public boolean changeSpeciesPlacesLimits(int speciesId, int newLimits) {
-        if (newLimits < 1){
+        if (newLimits < 1) {
             return false;
         }
 
@@ -105,10 +106,10 @@ public class SpeciesDatabase {
 
     private static boolean updateLimits(int id, int newLimits) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-        PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LIMITS)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LIMITS)) {
 
             preparedStatement.setInt(1, newLimits);
-            preparedStatement.setInt(2, newLimits);
+            preparedStatement.setInt(2, id);
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {

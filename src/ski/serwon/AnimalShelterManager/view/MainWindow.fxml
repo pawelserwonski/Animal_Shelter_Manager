@@ -31,7 +31,32 @@
 
                             </left>
                             <center>
+                                <GridPane vgap="10" hgap="10">
+                                    <Label text="Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <Label fx:id="nameLabel" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
+                                    <Label text="ID number:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <Label fx:id="idLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                                    <Label text="Sex:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <Label fx:id="sexLabel" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                    <!--<Label text="Species:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>-->
+                                    <!--<Label fx:id="speciesLabel" GridPane.rowIndex="3" GridPane.columnIndex="1"/>-->
+
+                                    <Label text="Breed:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <Label fx:id="breedLabel" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                                    <Label text="In shelter since:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                                    <Label fx:id="inShelterSinceLabel" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                                    <Label text="Date of birth:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                                    <Label fx:id="birthdateLabel" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                                    <Label text="Days since last walked :" GridPane.rowIndex="7"
+                                           GridPane.columnIndex="0"/>
+                                    <Label fx:id="lastWalkedLabel" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+                                </GridPane>
                             </center>
                             <top>
                                 <ToolBar BorderPane.alignment="CENTER">
@@ -39,10 +64,10 @@
                                         <ChoiceBox fx:id="speciesChoiceBox"
                                                    minWidth="200"/>  <!-- multiple selection choice box for types of animals -->
 
-                                        <Button mnemonicParsing="false" text="Add"/>
-                                        <Button text="Edit"/>
-                                        <Button text="Delete"/>
-
+                                        <Button text="Add" fx:id="addButton" onAction="#showNewAnimalDialog"/>
+                                        <Button text="Edit" fx:id="editButton"/>
+                                        <Button text="Delete" fx:id="deleteButton"/>
+                                        <Button text="Walk Out" fx:id="walkOutButton"/>
                                     </items>
                                 </ToolBar>
                             </top>
@@ -54,16 +79,20 @@
                         <GridPane vgap="10" hgap="100">
 
                             <Label text="Species:" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                            <ListView fx:id="speciesListView" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                            <ListView fx:id="speciesListView" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                                      onKeyPressed="#showBreedsForSelectedSpecies"/>
                             <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="1"
                                     onAction="#showNewSpeciesDialog"/>
-                            <Button text="Edit limit" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            <Button text="Edit limit" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                                    onAction="#showEditSpeciesDialog"/>
 
 
                             <Label text="Breeds:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
                             <ListView fx:id="breedsListView" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                            <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
-                            <Button text="Edit" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+                            <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="2"
+                                    onAction="#addNewBreed"/>
+                            <Button text="Edit" GridPane.rowIndex="4" GridPane.columnIndex="2"
+                                    onAction="#editBreed"/>
 
 
                         </GridPane>
