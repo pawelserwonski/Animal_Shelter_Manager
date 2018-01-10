@@ -45,6 +45,9 @@ public class BreedDatabase {
             + " SET " + Database.BREEDS_COLUMN_REQUIRE_WALKS + " = ? WHERE "
             + Database.BREEDS_COLUMN_ID + " = ?";
 
+    public static final String SELECT_SPECIES_ID_FOR_BREED = "SELECT " + Database.BREEDS_COLUMN_SPECIES
+            + " FROM " + Database.TABLE_BREEDS + " WHERE " + Database.BREEDS_COLUMN_ID + " = ?";
+
     public List<Breed> getBreedsOfSpecifiedSpecies(Species species) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BREEDS_OF_SPECIFIED_SPECIES)) {
@@ -103,6 +106,26 @@ public class BreedDatabase {
         } catch (SQLException e) {
             //todo
             return null;
+        }
+    }
+
+    public int getSpeciesIdForBreed(Breed breed) {
+        if (breed == null) {
+            return -1;
+        }
+
+        try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
+             PreparedStatement statement = connection.prepareStatement
+                     (SELECT_SPECIES_ID_FOR_SPECIFIED_BREED)) {
+            statement.setInt(1, breed.getId());
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+            return -3;
+        } catch (SQLException e) {
+            return -2;
         }
     }
 
@@ -214,13 +237,13 @@ public class BreedDatabase {
 
     private boolean updateExistingBreed(boolean requiresWalk, int id) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-        PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_BREED)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_BREED)) {
             preparedStatement.setBoolean(1, requiresWalk);
             preparedStatement.setInt(2, id);
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
-           return false;
+            return false;
         }
     }
 }

@@ -86,7 +86,27 @@ public class Animal {
         return lastWalk;
     }
 
+    public void setLastWalk(LocalDate lastWalk) {
+        this.lastWalk = lastWalk;
+    }
+
     public int getId() {
         return id;
+    }
+
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public void setBreed(Breed breed) {
+        this.breed = breed;
     }
 }

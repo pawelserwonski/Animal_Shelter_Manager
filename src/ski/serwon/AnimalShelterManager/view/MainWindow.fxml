@@ -15,6 +15,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.VBox?>
 <GridPane alignment="TOP_CENTER" minHeight="450.0" minWidth="800.0" xmlns="http://javafx.com/javafx/8.0.121"
           xmlns:fx="http://javafx.com/fxml/1"
           fx:id="mainGridPane"
@@ -61,13 +63,14 @@
                             <top>
                                 <ToolBar BorderPane.alignment="CENTER">
                                     <items>
-                                        <ChoiceBox fx:id="speciesChoiceBox"
-                                                   minWidth="200"/>  <!-- multiple selection choice box for types of animals -->
+                                        <ComboBox fx:id="speciesComboBox"
+                                                   minWidth="200" />
+                                        <Button text="Clear selection" onAction="#clearSpeciesSelection"/>
 
                                         <Button text="Add" fx:id="addButton" onAction="#showNewAnimalDialog"/>
-                                        <Button text="Edit" fx:id="editButton"/>
-                                        <Button text="Delete" fx:id="deleteButton"/>
-                                        <Button text="Walk Out" fx:id="walkOutButton"/>
+                                        <Button text="Edit" fx:id="editButton" onAction="#showEditAnimalDialog"/>
+                                        <Button text="Delete" fx:id="deleteButton" onAction="#deleteAnimal"/>
+                                        <Button text="Walk Out" fx:id="walkOutButton" onAction="#walkOut"/>
                                     </items>
                                 </ToolBar>
                             </top>
@@ -76,7 +79,7 @@
                 </Tab>
                 <Tab text="Species and Breeds">
                     <content>
-                        <GridPane vgap="10" hgap="100">
+                        <GridPane vgap="10" hgap="42">
 
                             <Label text="Species:" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                             <ListView fx:id="speciesListView" GridPane.rowIndex="2" GridPane.columnIndex="1"
@@ -86,12 +89,21 @@
                             <Button text="Edit limit" GridPane.rowIndex="4" GridPane.columnIndex="1"
                                     onAction="#showEditSpeciesDialog"/>
 
+                            <VBox GridPane.rowIndex="2" GridPane.columnIndex="2">
+                                <Label text="Occupied places:" />
+                                <Label fx:id="occupiedPlacesLabel"/>
+                                <Label text="Places limit:" />
+                                <Label fx:id="placesLimitLabel" />
+                                <Label text="Unused percent of places"/>
+                                <Label fx:id="freePlacesPercentLabel" />
+                            </VBox>
 
-                            <Label text="Breeds:" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                            <ListView fx:id="breedsListView" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-                            <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="2"
+
+                            <Label text="Breeds:" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                            <ListView fx:id="breedsListView" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                            <Button text="Add" GridPane.rowIndex="3" GridPane.columnIndex="3"
                                     onAction="#addNewBreed"/>
-                            <Button text="Edit" GridPane.rowIndex="4" GridPane.columnIndex="2"
+                            <Button text="Edit" GridPane.rowIndex="4" GridPane.columnIndex="3"
                                     onAction="#editBreed"/>
 
 
@@ -102,19 +114,20 @@
         </TabPane>
         <MenuBar GridPane.rowIndex="0">
             <menus>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu text="_File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close"/>
+                        <MenuItem text="_Close" onAction="#closeMenuItemHandler"/>
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
+                <Menu text="_Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
+                        <MenuItem text="_Change warning threshold"
+                                  onAction="#changeWarningThresholdMenuItemHandler"/>
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Help">
+                <Menu text="_Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
+                        <MenuItem text="_About" onAction="#aboutMenuItemHandler"/>
                     </items>
                 </Menu>
             </menus>

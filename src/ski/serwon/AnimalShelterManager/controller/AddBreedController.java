@@ -2,9 +2,14 @@ package ski.serwon.AnimalShelterManager.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import ski.serwon.AnimalShelterManager.model.Animal;
 import ski.serwon.AnimalShelterManager.model.Breed;
 import ski.serwon.AnimalShelterManager.model.Species;
+import ski.serwon.AnimalShelterManager.model.datamodel.AnimalDatabase;
 import ski.serwon.AnimalShelterManager.model.datamodel.BreedDatabase;
+import ski.serwon.AnimalShelterManager.model.datamodel.SpeciesDatabase;
+
+import java.time.LocalDate;
 
 public class AddBreedController {
     @FXML
@@ -63,8 +68,16 @@ public class AddBreedController {
             alert.setTitle("Oops");
             alert.setContentText("Problem with editing database occurred");
             alert.showAndWait();
+            return;
         }
 
+        if (breed.doesRequireWalk()) {
+            for (Animal animal : AnimalDatabase.getAnimalsOfSpecifiedBreed(breed)) {
+                if (animal.getLastWalk() == null) {
+                    AnimalDatabase.getInstance().walkOutAnimal(animal);
+                }
+            }
+        }
     }
 
     private void showWarning(String title, String content) {

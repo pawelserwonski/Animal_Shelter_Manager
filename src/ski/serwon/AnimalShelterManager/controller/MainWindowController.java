@@ -1,11 +1,21 @@
 package ski.serwon.AnimalShelterManager.controller;
 
+import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -14,16 +24,22 @@ import ski.serwon.AnimalShelterManager.model.Breed;
 import ski.serwon.AnimalShelterManager.model.Species;
 import ski.serwon.AnimalShelterManager.model.WalkException;
 import ski.serwon.AnimalShelterManager.model.datamodel.AnimalDatabase;
+import ski.serwon.AnimalShelterManager.model.datamodel.ApplicationSettings;
 import ski.serwon.AnimalShelterManager.model.datamodel.SpeciesDatabase;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MainWindowController {
     @FXML
-    ChoiceBox<Species> speciesChoiceBox;
+    ComboBox<Species> speciesComboBox;
 
     @FXML
     ListView<Animal> animalsListView;
@@ -53,6 +69,12 @@ public class MainWindowController {
     Label birthdateLabel;
     @FXML
     Label lastWalkedLabel;
+    @FXML
+    Label occupiedPlacesLabel;
+    @FXML
+    Label placesLimitLabel;
+    @FXML
+    Label freePlacesPercentLabel;
 
     @FXML
     Button addButton;
@@ -63,27 +85,40 @@ public class MainWindowController {
     @FXML
     Button walkOutButton;
 
+    private SortedList<Animal> animalSortedList = new SortedList<Animal>
+            (AnimalDatabase.getInstance().getAnimals(), Comparator.comparing(Animal::getName));
+
+
     public void initialize() {
         handleAnimalsListViewInitialize();
         handleSpeciesListViewInitialize();
+        handleSpeciesComboBoxInitialize();
 
+        List<Species> closeToLimitSpeciesList = speciesListView.getItems()
+                .stream()
+                .filter(c -> c.getPercentOfFreePlaces() < ApplicationSettings.percentOfFreePlacesToWarning)
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+
+        if (closeToLimitSpeciesList.size() > 0) {
+            StringBuilder message = new StringBuilder("List of species with a small percentage of vacancies:\n");
+            closeToLimitSpeciesList.forEach(c -> message.append(c.getName() + "\n"));
+            showWarning("Some species are getting close to the limits", message.toString());
+        }
     }
 
     private void handleAnimalsListViewInitialize() {
-        SortedList<Animal> animalSortedList = new SortedList<Animal>
-                (AnimalDatabase.getInstance().getAnimals()
-                        , Comparator.comparing(Animal::getName));
 
         animalsListView.setItems(animalSortedList);
         animalsListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         animalsListView.getSelectionModel().selectedItemProperty()
                 .addListener(new ChangeListener<Animal>() {
-            @Override
-            public void changed(ObservableValue<? extends Animal> observable, Animal oldValue, Animal newValue) {
-                showSelectedAnimal();
-            }
-        });
+                    @Override
+                    public void changed(ObservableValue<? extends Animal> observable, Animal oldValue, Animal newValue) {
+                        showSelectedAnimal();
+                    }
+                });
 
         animalsListView.getSelectionModel().selectFirst();
 
@@ -126,14 +161,52 @@ public class MainWindowController {
                     @Override
                     public void changed(ObservableValue<? extends Species> observable, Species oldValue, Species newValue) {
                         showBreedsForSelectedSpecies();
+                        populateSpeciesInfoLabels(newValue);
                     }
                 });
         speciesListView.getSelectionModel().selectFirst();
 
-        speciesListView.setCellFactory(new Callback<ListView<Species>, ListCell<Species>>() {
+        speciesListView.setCellFactory(getSpeciesCellFactory());
+
+    }
+
+    private void populateSpeciesInfoLabels(Species species) {
+        occupiedPlacesLabel.setText(String.valueOf(species.getOccupiedPlaces()));
+        placesLimitLabel.setText(String.valueOf(species.getPlacesLimit()));
+        freePlacesPercentLabel.setText(String.valueOf(species.getPercentOfFreePlaces()) + "%");
+    }
+
+    private void handleSpeciesComboBoxInitialize() {
+        speciesComboBox.setItems(speciesListView.getItems());
+        speciesComboBox.setButtonCell(getSpeciesCellFactory().call(null));
+        speciesComboBox.setCellFactory(getSpeciesCellFactory());
+
+        speciesComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Species>() {
+            @Override
+            public void changed(ObservableValue<? extends Species> observable, Species oldValue, Species newValue) {
+                if (newValue == null) {
+                    animalsListView.setItems(animalSortedList);
+                } else {
+                    ObservableList<Animal> list = animalSortedList.stream()
+                            .filter(c -> newValue.getBreeds().contains(c.getBreed()))
+                            .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+                    animalsListView.setItems(list);
+                }
+            }
+        });
+    }
+
+    @FXML
+    private void clearSpeciesSelection() {
+        speciesComboBox.getSelectionModel().clearSelection();
+    }
+
+    private Callback<ListView<Species>, ListCell<Species>> getSpeciesCellFactory() {
+        return new Callback<>() {
             @Override
             public ListCell<Species> call(ListView<Species> param) {
-                ListCell<Species> cell = new ListCell<Species>() {
+                ListCell<Species> cell = new ListCell<>() {
                     @Override
                     protected void updateItem(Species item, boolean empty) {
                         super.updateItem(item, empty);
@@ -141,17 +214,21 @@ public class MainWindowController {
                             setText(null);
                         } else {
                             setText(item.getName());
+                            if (item.getPercentOfFreePlaces() < ApplicationSettings.percentOfFreePlacesToWarning) {
+                                setTextFill(Color.RED);
+                            } else {
+                                setTextFill(Color.BLACK);
+                            }
                         }
                     }
                 };
                 return cell;
             }
-        });
-
+        };
     }
 
     @FXML
-    public void showNewSpeciesDialog() {
+    private void showNewSpeciesDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(mainGridPane.getScene().getWindow());
         dialog.setTitle("Add species");
@@ -183,7 +260,7 @@ public class MainWindowController {
     }
 
     @FXML
-    public void showBreedsForSelectedSpecies() {
+    private void showBreedsForSelectedSpecies() {
         Species selectedSpecies = speciesListView
                 .getSelectionModel().getSelectedItem();
 
@@ -214,7 +291,7 @@ public class MainWindowController {
     }
 
     @FXML
-    public void showEditSpeciesDialog() {
+    private void showEditSpeciesDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(mainGridPane.getScene().getWindow());
         dialog.setTitle("Edit limit");
@@ -244,11 +321,13 @@ public class MainWindowController {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             controller.editPlacesLimit(selectedSpecies);
+            speciesListView.refresh();
+            populateSpeciesInfoLabels(selectedSpecies);
         }
     }
 
     @FXML
-    public void addNewBreed() {
+    private void addNewBreed() {
         Species selectedSpecies = speciesListView
                 .getSelectionModel().getSelectedItem();
 
@@ -284,7 +363,7 @@ public class MainWindowController {
     }
 
     @FXML
-    public void editBreed() {
+    private void editBreed() {
         Breed selectedBreed = breedsListView.getSelectionModel().getSelectedItem();
 
         if (selectedBreed == null) {
@@ -316,10 +395,12 @@ public class MainWindowController {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             controller.editBreed(selectedBreed);
+            animalsListView.refresh();
         }
     }
 
-    public void showNewAnimalDialog() {
+    @FXML
+    private void showNewAnimalDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(mainGridPane.getScene().getWindow());
         dialog.setTitle("Add animal");
@@ -346,12 +427,125 @@ public class MainWindowController {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             controller.addNewAnimal();
+            animalsListView.refresh();
         }
 
     }
 
+    @FXML
+    private void showEditAnimalDialog() {
+        Animal selectedAnimal = animalsListView.getSelectionModel().getSelectedItem();
+        if (selectedAnimal == null) {
+            showWarning("Select animal", "You have to select animal " +
+                    "from the list in order to edit it");
+            return;
+        }
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(mainGridPane.getScene().getWindow());
+        dialog.setTitle("Edit animal");
+        dialog.setHeaderText("Edit animal existing in database");
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setLocation(getClass().getClassLoader().getResource("ski" + File.separator
+                + "serwon" + File.separator + "AnimalShelterManager" + File.separator
+                + "view" + File.separator + "addEditAnimal.fxml"));
+        try {
+            dialog.getDialogPane().setContent(fxmlLoader.load());
+        } catch (IOException e) {
+            System.out.println("IOException");
+            //todo
+        }
+
+        AddEditAnimalController controller = fxmlLoader.getController();
+        controller.populateSpeciesComboBox();
+        controller.fillFieldsWithAnimal(selectedAnimal);
+
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            controller.editExistingAnimal(selectedAnimal);
+            animalsListView.refresh();
+        }
+    }
+
+    @FXML
+    private void walkOut() {
+        Animal selectedAnimal = animalsListView.getSelectionModel().getSelectedItem();
+        if (selectedAnimal == null) {
+            return;
+        }
+
+        AnimalDatabase.getInstance().walkOutAnimal(selectedAnimal);
+        animalsListView.refresh();
+        showSelectedAnimal();
+    }
+
+    @FXML
+    private void deleteAnimal() {
+        Animal selectedAnimal = animalsListView.getSelectionModel().getSelectedItem();
+        if (selectedAnimal == null) {
+            showWarning("Oops", "You have to select animal in order to delete it");
+            return;
+        }
+
+        if (!AnimalDatabase.getInstance().deleteAnimal(selectedAnimal)) {
+            showError("Error", "Animal couldn't have been removed. Try again");
+        }
+        animalsListView.refresh();
+        animalsListView.getSelectionModel().selectFirst();
+    }
+
+    @FXML
+    private void closeMenuItemHandler() {
+        Platform.exit();
+    }
+
+    @FXML
+    private void changeWarningThresholdMenuItemHandler() {
+        //TODO
+    }
+
+    @FXML
+    private void aboutMenuItemHandler() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText("About the program");
+
+        FlowPane flowPane = new FlowPane();
+        flowPane.setPrefWrapLength(280);
+
+        Label desc = new Label("Animal Shelter Manager      Created by Paweł Serwoński");
+        Label git = new Label("Github - ");
+
+        Hyperlink hyperlink = new Hyperlink("https://github.com/pawelserwonski/");
+        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    Desktop.getDesktop().browse(URI.create(hyperlink.getText()));
+                } catch (IOException e) {
+                    showError("Error", "Error during opening default browser");
+                }
+            }
+        });
+
+        flowPane.getChildren().addAll(desc, git, hyperlink);
+        alert.getDialogPane().contentProperty().set(flowPane);
+        alert.show();
+    }
+
     private void showWarning(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    private void showError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setContentText(content);
         alert.showAndWait();
@@ -367,12 +561,15 @@ public class MainWindowController {
         inShelterSinceLabel.setText(selectedAnimal.getInShelterSince().toString());
         birthdateLabel.setText(selectedAnimal.getBirthDate().toString());
         try {
-            lastWalkedLabel.setText(String.valueOf(selectedAnimal.daysSinceLastWalked()));
+            lastWalkedLabel.setText(String.valueOf(selectedAnimal.daysSinceLastWalked())
+                    + " - " + selectedAnimal.getLastWalk());
             walkOutButton.setVisible(true);
         } catch (WalkException e) {
             lastWalkedLabel.setText("Animal does not need to be walked out.");
             walkOutButton.setVisible(false);
         }
     }
+
+
 }
 

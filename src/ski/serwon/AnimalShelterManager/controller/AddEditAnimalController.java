@@ -5,8 +5,10 @@ import javafx.scene.control.*;
 import javafx.util.Callback;
 import ski.serwon.AnimalShelterManager.model.Animal;
 import ski.serwon.AnimalShelterManager.model.Breed;
+import ski.serwon.AnimalShelterManager.model.NoEmptySpacesException;
 import ski.serwon.AnimalShelterManager.model.Species;
 import ski.serwon.AnimalShelterManager.model.datamodel.AnimalDatabase;
+import ski.serwon.AnimalShelterManager.model.datamodel.BreedDatabase;
 import ski.serwon.AnimalShelterManager.model.datamodel.SpeciesDatabase;
 
 public class AddEditAnimalController {
@@ -71,40 +73,78 @@ public class AddEditAnimalController {
 
         breedComboBox.setButtonCell((ListCell<Breed>) cellFactory.call(null));
         breedComboBox.setCellFactory(cellFactory);
+    }
+
+    public void fillFieldsWithAnimal(Animal animal) {
+        int speciesId = BreedDatabase.getInstance().getSpeciesIdForBreed(animal.getBreed());
+        if (speciesId < 0) {
+            String warningContent = "";
+            switch (speciesId) {
+                case -1:
+                    warningContent = "Internal error - breed not selected";
+                    break;
+                case -2:
+                    warningContent = "Problem with database occurred";
+                    break;
+                case -3:
+                    warningContent = "No breed with such id in database";
+                    break;
+            }
+            showWarning("Oops", warningContent);
+            return;
+        }
+
+        Species species = SpeciesDatabase.getInstance().getSpeciesById(speciesId);
+        speciesComboBox.getSelectionModel().select(species);
+        speciesComboBox.setDisable(true);
+        populateBreedComboBox();
+        breedComboBox.getSelectionModel().select(animal.getBreed());
+        birthDatePicker.setValue(animal.getBirthDate());
+        nameTextField.setText(animal.getName());
+        if (animal.getSex() == Animal.Sex.male) {
+            maleRadioButton.setSelected(true);
+        } else {
+            femaleRadioButton.setSelected(true);
+        }
+    }
+
+    public void editExistingAnimal(Animal animal) {
+        if (!checkFields()) {
+            return;
+        }
+
+        if (!AnimalDatabase.getInstance().editAnimal(animal,
+                breedComboBox.getValue(), nameTextField.getText(),
+                maleRadioButton.isSelected() ? Animal.Sex.male : Animal.Sex.female,
+                birthDatePicker.getValue())) {
+            showError("Error", "Problem with editing occurred");
+        }
 
     }
 
     public void addNewAnimal() {
-        if (!femaleRadioButton.isSelected() && !maleRadioButton.isSelected()) {
-            showWarning("Select sex", "Sex needs to be selected");
+        if (!checkFields()) {
             return;
         }
 
-        if (nameTextField.getText().equals("")) {
-            showWarning("Empty name", "Name cannot be empty");
-            return;
+        try {
+            if (!AnimalDatabase.getInstance().addAnimal(
+                    maleRadioButton.isSelected() ? Animal.Sex.male : Animal.Sex.female,
+                    nameTextField.getText(), birthDatePicker.getValue(),
+                    breedComboBox.getValue())) {
+                showError("Error", "Animal couldn't be added");
+            }
+        } catch (NoEmptySpacesException e) {
+            showError("All places taken", e.getMessage());
         }
 
-        if (breedComboBox.getValue() == null) {
-            showWarning("Select breed", "Breed selection cannot be empty");
-            return;
-        }
+    }
 
-        if (birthDatePicker.getValue() == null) {
-            showWarning("Select birth date", "Birth date needs to be selected." +
-                    " If you don't have exact date, select first day of month, first month of year, etc.");
-            return;
-        }
-
-        if (!AnimalDatabase.getInstance().addAnimal(
-                maleRadioButton.isSelected() ? Animal.Sex.male : Animal.Sex.female,
-                nameTextField.getText(), birthDatePicker.getValue(),
-                breedComboBox.getValue())) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setContentText("Animal couldn't be added");
-            alert.showAndWait();
-        }
+    private void showError(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void showWarning(String title, String content) {
@@ -112,5 +152,29 @@ public class AddEditAnimalController {
         alert.setTitle(title);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    private boolean checkFields() {
+        if (!femaleRadioButton.isSelected() && !maleRadioButton.isSelected()) {
+            showWarning("Select sex", "Sex needs to be selected");
+            return false;
+        }
+
+        if (nameTextField.getText().equals("")) {
+            showWarning("Empty name", "Name cannot be empty");
+            return false;
+        }
+
+        if (breedComboBox.getValue() == null) {
+            showWarning("Select breed", "Breed selection cannot be empty");
+            return false;
+        }
+
+        if (birthDatePicker.getValue() == null) {
+            showWarning("Select birth date", "Birth date needs to be selected." +
+                    " If you don't have exact date, select first day of month, first month of year, etc.");
+            return false;
+        }
+        return true;
     }
 }

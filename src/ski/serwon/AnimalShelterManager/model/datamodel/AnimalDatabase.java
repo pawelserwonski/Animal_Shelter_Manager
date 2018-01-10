@@ -4,60 +4,41 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import ski.serwon.AnimalShelterManager.model.Animal;
 import ski.serwon.AnimalShelterManager.model.Breed;
+import ski.serwon.AnimalShelterManager.model.NoEmptySpacesException;
 import ski.serwon.AnimalShelterManager.model.Species;
 
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 
 public class AnimalDatabase {
-    private int lastUsedId; // TODO check if works
-    private static AnimalDatabase instance = new AnimalDatabase();
-
-    private ObservableList<Animal> animals;
-
-    private AnimalDatabase() {
-        animals = FXCollections.observableList(getAllAnimalsFromDatabase());
-        lastUsedId = getLastAnimalId();
-    }
-
     public static final String SELECT_ALL_ANIMALS_FROM_DATABASE = "SELECT * FROM " + Database.TABLE_ANIMALS;
 
     public static final String SELECT_ANIMALS_OF_SPECIFIED_SPECIES = "SELECT * FROM " + Database.TABLE_ANIMALS
-            + " JOIN " + Database.TABLE_BREEDS + " ON " + Database.TABLE_ANIMALS + "."
-            + Database.ANIMALS_COLUMN_BREED + " = " + Database.TABLE_BREEDS + "."
-            + Database.BREEDS_COLUMN_ID + " JOIN " + Database.TABLE_SPECIES + " ON "
-            + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_SPECIES + " = "
-            + Database.TABLE_SPECIES + "." + Database.SPECIES_COLUMN_ID + " WHERE "
-            + Database.TABLE_SPECIES + "." + Database.SPECIES_COLUMN_ID + " = ?";
+            + " JOIN " + Database.TABLE_BREEDS + " ON " + Database.TABLE_ANIMALS + "." + Database.ANIMALS_COLUMN_BREED
+            + " = " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID + " JOIN " + Database.TABLE_SPECIES
+            + " ON " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_SPECIES + " = " + Database.TABLE_SPECIES
+            + "." + Database.SPECIES_COLUMN_ID + " WHERE " + Database.TABLE_SPECIES + "."
+            + Database.SPECIES_COLUMN_ID + " = ?";
 
-    public static final String SELECT_ANIMALS_OF_SPECIFIED_BREED = "SELECT * FROM "
-            + Database.TABLE_ANIMALS + " JOIN " + Database.TABLE_BREEDS
-            + " ON " + Database.TABLE_ANIMALS + "." + Database.ANIMALS_COLUMN_BREED
-            + " = " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID
-            + " WHERE " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID + " = ?";
+    public static final String SELECT_ANIMALS_OF_SPECIFIED_BREED = "SELECT * FROM " + Database.TABLE_ANIMALS + " JOIN "
+            + Database.TABLE_BREEDS + " ON " + Database.TABLE_ANIMALS + "." + Database.ANIMALS_COLUMN_BREED + " = "
+            + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID + " WHERE " + Database.TABLE_BREEDS + "."
+            + Database.BREEDS_COLUMN_ID + " = ?";
 
-    public static final String INSERT_NEW_ANIMAL = "INSERT INTO " + Database.TABLE_ANIMALS + "(" +
-            Database.ANIMALS_COLUMN_BREED + ", "
-            + Database.ANIMALS_COLUMN_NAME + ", "
-            + Database.ANIMALS_COLUMN_SEX + ", "
-            + Database.ANIMALS_COLUMN_BIRTHDATE + ", "
+    public static final String INSERT_NEW_ANIMAL = "INSERT INTO " + Database.TABLE_ANIMALS
+            + "(" + Database.ANIMALS_COLUMN_BREED + ", " + Database.ANIMALS_COLUMN_NAME + ", "
+            + Database.ANIMALS_COLUMN_SEX + ", " + Database.ANIMALS_COLUMN_BIRTHDATE + ", "
             + Database.ANIMALS_COLUMN_IN_SHELTER_SINCE + ", "
-            + Database.ANIMALS_COLUMN_LAST_WALK
-            + ") VALUES(?, ?, ?, ?, ?, ?)";
+            + Database.ANIMALS_COLUMN_LAST_WALK + ") VALUES(?, ?, ?, ?, ?, ?)";
 
-    public static final String UPDATE_EXISTING_ANIMAL = "UPDATE " + Database.TABLE_ANIMALS + " SET " +
-            Database.ANIMALS_COLUMN_BREED + " = ?, "
-            + Database.ANIMALS_COLUMN_NAME + " = ?, "
-            + Database.ANIMALS_COLUMN_SEX + " = ?, "
-            + Database.ANIMALS_COLUMN_BIRTHDATE + " = ?, "
-            + Database.ANIMALS_COLUMN_IN_SHELTER_SINCE + " = ?"
-            + " WHERE " + Database.ANIMALS_COLUMN_ID + " = ?";
+    public static final String UPDATE_EXISTING_ANIMAL = "UPDATE " + Database.TABLE_ANIMALS + " SET "
+            + Database.ANIMALS_COLUMN_BREED + " = ?, " + Database.ANIMALS_COLUMN_NAME + " = ?, "
+            + Database.ANIMALS_COLUMN_SEX + " = ?, " + Database.ANIMALS_COLUMN_BIRTHDATE + " = ? "
+            + "WHERE " + Database.ANIMALS_COLUMN_ID + " = ?";
 
     public static final String REMOVE_ANIMAL = "DELETE FROM " + Database.TABLE_ANIMALS
             + " WHERE " + Database.ANIMALS_COLUMN_ID + " = ?";
@@ -70,6 +51,24 @@ public class AnimalDatabase {
 
     public static final String SELECT_MAX_USED_ID = "SELECT MAX(" + Database.ANIMALS_COLUMN_ID + ") "
             + "FROM " + Database.TABLE_ANIMALS;
+
+    public static final String COUNT_ANIMALS_OF_SPECIFIED_SPECIES = "SELECT COUNT("
+            + Database.TABLE_ANIMALS + "." + Database.ANIMALS_COLUMN_ID + ") FROM "
+            + Database.TABLE_ANIMALS + " JOIN " + Database.TABLE_BREEDS + " ON "
+            + Database.TABLE_ANIMALS + "." + Database.ANIMALS_COLUMN_BREED + " = "
+            + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID
+            + " WHERE " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_SPECIES + " = ?";
+
+    private static AnimalDatabase instance = new AnimalDatabase();
+    private int lastUsedId;
+    private ObservableList<Animal> animals;
+
+
+    private AnimalDatabase() {
+        animals = FXCollections.observableList(getAllAnimalsFromDatabase());
+        lastUsedId = getLastAnimalId();
+    }
+
 
     public static List<Animal> getAllAnimalsFromDatabase() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
@@ -112,10 +111,27 @@ public class AnimalDatabase {
         }
     }
 
+    public static int countAnimalOfSpecifiedSpecies(int speciesId) {
+        try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
+             PreparedStatement preparedStatement = connection.prepareStatement(COUNT_ANIMALS_OF_SPECIFIED_SPECIES)) {
+            preparedStatement.setInt(1, speciesId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            } else {
+                return -2;
+            }
+        } catch (SQLException e) {
+            return -1;
+        }
+    }
+
     public static List<Animal> getAnimalsOfSpecifiedSpecies(Species species) {
         ResultSet resultSet = null;
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ANIMALS_OF_SPECIFIED_SPECIES)) {
+             PreparedStatement preparedStatement =
+                     connection.prepareStatement(SELECT_ANIMALS_OF_SPECIFIED_SPECIES)) {
 
             preparedStatement.setInt(1, species.getId());
             resultSet = preparedStatement.executeQuery();
@@ -166,7 +182,8 @@ public class AnimalDatabase {
     public static List<Animal> getAnimalsOfSpecifiedBreed(Breed breed) {
         ResultSet resultSet = null;
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ANIMALS_OF_SPECIFIED_BREED)) {
+             PreparedStatement preparedStatement =
+                     connection.prepareStatement(SELECT_ANIMALS_OF_SPECIFIED_BREED)) {
 
             preparedStatement.setInt(1, breed.getId());
             resultSet = preparedStatement.executeQuery();
@@ -215,9 +232,14 @@ public class AnimalDatabase {
         }
     }
 
+    public static AnimalDatabase getInstance() {
+        return instance;
+    }
+
     private boolean insertNewAnimal(Animal animal) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_NEW_ANIMAL)) {
+             PreparedStatement preparedStatement =
+                     connection.prepareStatement(INSERT_NEW_ANIMAL)) {
 
             preparedStatement.setInt(1, animal.getBreed().getId());
             preparedStatement.setString(2, animal.getName());
@@ -237,21 +259,31 @@ public class AnimalDatabase {
         }
     }
 
-    public boolean updateExistingAnimal(Animal updatedAnimal) {
+    public boolean editAnimal(Animal animal, Breed updatedBreed, String updatedName,
+                              Animal.Sex updatedSex, LocalDate updatedBirthDate) {
+        if (animal != null && updateExistingAnimalInDatabase(animal.getId(),
+                updatedBreed, updatedName, updatedSex, updatedBirthDate)) {
+            animal.setBreed(updatedBreed);
+            animal.setName(updatedName);
+            animal.setSex(updatedSex);
+            animal.setBirthDate(updatedBirthDate);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean updateExistingAnimalInDatabase(int updatesAnimalsId, Breed updatedBreed,
+                                                   String updatedName, Animal.Sex updatedSex, LocalDate updatedDate) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_ANIMAL)) {
 
-            preparedStatement.setString(1, updatedAnimal.getName());
-            preparedStatement.setString(2, updatedAnimal.getSex().toString());
-            preparedStatement.setString(3, updatedAnimal.getBirthDate().toString());
-            preparedStatement.setString(4, updatedAnimal.getInShelterSince().toString());
-            try {
-                preparedStatement.setString(5, updatedAnimal.getLastWalk().toString());
-            } catch (NullPointerException e) {
-                preparedStatement.setDate(5, null);
-            }
-
-            preparedStatement.setInt(6, updatedAnimal.getBreed().getId());
+            preparedStatement.setInt(1, updatedBreed.getId());
+            preparedStatement.setString(2, updatedName);
+            preparedStatement.setString(3, updatedSex.toString());
+            preparedStatement.setString(4, updatedDate.toString());
+            preparedStatement.setInt(5, updatesAnimalsId);
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
@@ -260,7 +292,16 @@ public class AnimalDatabase {
         }
     }
 
-    public boolean removeAnimal(Animal animalToRemove) {
+    public boolean deleteAnimal(Animal animalToDelete) {
+        if (animalToDelete != null && removeAnimalFromDatabase(animalToDelete)) {
+            animals.remove(animalToDelete);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean removeAnimalFromDatabase(Animal animalToRemove) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_ANIMAL)) {
 
@@ -273,9 +314,19 @@ public class AnimalDatabase {
         }
     }
 
-    public boolean updateLaskWalkDate(LocalDate updatedDate, Animal walkedAnimal) {
+    public boolean walkOutAnimal(Animal animal) {
+        LocalDate newDate = LocalDate.now();
+        if (animal.getBreed().doesRequireWalk() && updateLaskWalkDate(newDate, animal)) {
+            animal.setLastWalk(newDate);
+
+            return true;
+        }
+        return false;
+    }
+
+    private boolean updateLaskWalkDate(LocalDate updatedDate, Animal walkedAnimal) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
-        PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LAST_WALK)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LAST_WALK)) {
 
             preparedStatement.setString(1, updatedDate.toString());
             preparedStatement.setInt(2, walkedAnimal.getId());
@@ -287,7 +338,6 @@ public class AnimalDatabase {
             return false;
         }
     }
-
 
     public int countAnimals() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
@@ -304,7 +354,6 @@ public class AnimalDatabase {
             //todo -- handle SQLException
             return -1;
         }
-
     }
 
     public int getLastAnimalId() {
@@ -323,15 +372,19 @@ public class AnimalDatabase {
         }
     }
 
-    public static AnimalDatabase getInstance() {
-        return instance;
-    }
 
     public ObservableList<Animal> getAnimals() {
         return animals;
     }
 
-    public boolean addAnimal(Animal.Sex sex, String name, LocalDate birthDate, Breed breed) {
+    public boolean addAnimal(Animal.Sex sex, String name, LocalDate birthDate, Breed breed)
+    throws NoEmptySpacesException{
+        Species species = SpeciesDatabase.getInstance().getSpeciesById
+                ((BreedDatabase.getInstance().getSpeciesIdForBreed(breed)));
+        if (species.getPlacesLimit() < 1) {
+            throw new NoEmptySpacesException("There is no empty space for selected species.");
+        }
+
         LocalDate inShelterSince = LocalDate.now();
         LocalDate lastWalk = breed.doesRequireWalk() ? LocalDate.now() : null;
         int animalID = ++lastUsedId;

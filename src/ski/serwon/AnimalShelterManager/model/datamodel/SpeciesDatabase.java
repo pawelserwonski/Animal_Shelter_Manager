@@ -55,8 +55,9 @@ public class SpeciesDatabase {
                     int id = resultSet.getInt(idColumn);
                     String name = resultSet.getString(nameColumn);
                     int limit = resultSet.getInt(limitColumn);
+                    int occupiedPlaces = AnimalDatabase.countAnimalOfSpecifiedSpecies(id);
 
-                    toReturn.add(new Species(id, name, limit));
+                    toReturn.add(new Species(id, name, limit, occupiedPlaces));
                 } while (resultSet.next());
             }
 

@@ -11,6 +11,8 @@ public class Species {
     private int placesLimit;
     private int id;
     private ObservableList<Breed> breeds;
+    private int occupiedPlaces;
+
 
     public boolean addBreed(String name, boolean requireWalks) {
         return BreedDatabase.getInstance().addBreedToSpecies(this, name, requireWalks);
@@ -22,6 +24,25 @@ public class Species {
         this.placesLimit = placesLimit;
         this.breeds = FXCollections.observableArrayList
                 (BreedDatabase.getInstance().getBreedsOfSpecifiedSpecies(this));
+        this.occupiedPlaces = 0;
+    }
+
+    public Species(int id, String name, int placesLimit, int occupiedPlaces) {
+        this.id = id;
+        this.name = name;
+        this.placesLimit = placesLimit;
+        this.breeds = FXCollections.observableArrayList
+                (BreedDatabase.getInstance().getBreedsOfSpecifiedSpecies(this));
+        this.occupiedPlaces = occupiedPlaces;
+    }
+
+    public double getPercentOfFreePlaces() {
+        return 100.0 - (100 * occupiedPlaces / placesLimit);
+    }
+
+
+    public int getOccupiedPlaces() {
+        return occupiedPlaces;
     }
 
     public String getName() {
