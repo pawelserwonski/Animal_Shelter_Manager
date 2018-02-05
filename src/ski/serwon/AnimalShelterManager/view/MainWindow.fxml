@@ -121,8 +121,8 @@
                 </Menu>
                 <Menu text="_Edit">
                     <items>
-                        <MenuItem text="_Change warning threshold"
-                                  onAction="#changeWarningThresholdMenuItemHandler"/>
+                        <MenuItem text="_Settings"
+                                  onAction="#settingsHandler"/>
                     </items>
                 </Menu>
                 <Menu text="_Help">

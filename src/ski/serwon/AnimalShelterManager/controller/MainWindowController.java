@@ -15,6 +15,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -504,8 +506,37 @@ public class MainWindowController {
     }
 
     @FXML
-    private void changeWarningThresholdMenuItemHandler() {
-        //TODO
+    private void settingsHandler() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(mainGridPane.getScene().getWindow());
+        dialog.setTitle("Settings");
+
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setLocation(getClass().getClassLoader().getResource("ski" + File.separator
+                + "serwon" + File.separator + "AnimalShelterManager" + File.separator
+                + "view" + File.separator + "settingsWindow.fxml"));
+        try {
+            dialog.getDialogPane().setContent(fxmlLoader.load());
+        } catch (IOException e) {
+            System.out.println("IOException");
+            showError("Internal problem", "Problem with loading window occurred.");
+        }
+
+        SettingsWindowController controller = fxmlLoader.getController();
+        controller.setThresholdWaringSpinner(ApplicationSettings.getPercentOfFreePlacesToWarning());
+
+
+
+        ButtonType saveButtonType = new ButtonType("Save");
+        dialog.getDialogPane().getButtonTypes().add(saveButtonType);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == saveButtonType) {
+            controller.saveSettings();
+            speciesListView.refresh();
+        }
     }
 
     @FXML

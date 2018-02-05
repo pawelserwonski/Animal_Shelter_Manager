@@ -8,8 +8,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * BreedDatabase represents part of database which is
+ * responsible for keeping list of Breeds.
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class BreedDatabase {
+    /**
+     * Singleton instance of class.
+     */
     private static BreedDatabase instance = new BreedDatabase();
+
+    /**
+     * Last (highest number) used ID in database.
+     */
     private int lastUsedId;
 
 
@@ -48,6 +62,15 @@ public class BreedDatabase {
     public static final String SELECT_SPECIES_ID_FOR_BREED = "SELECT " + Database.BREEDS_COLUMN_SPECIES
             + " FROM " + Database.TABLE_BREEDS + " WHERE " + Database.BREEDS_COLUMN_ID + " = ?";
 
+
+    /**
+     * Method connects to database and loads record(s) representing breed(s) of selected species
+     * from BREEDS table.
+     * Each record from database is then used to create one {@link Breed} object.
+     *
+     * @param species Selected species
+     * @return List of {@link Breed} objects loaded from database.
+     */
     public List<Breed> getBreedsOfSpecifiedSpecies(Species species) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BREEDS_OF_SPECIFIED_SPECIES)) {
@@ -74,11 +97,16 @@ public class BreedDatabase {
             return toReturn;
 
         } catch (SQLException e) {
-            //todo
             return new LinkedList<>();
         }
     }
 
+    /**
+     * Method connects to database and loads every record from BREEDS table.
+     * Each record from database is then used to create one {@link Breed} object.
+     *
+     * @return List of {@link Breed} objects loaded from database.
+     */
     public List<Breed> getAllBreeds() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -104,11 +132,18 @@ public class BreedDatabase {
             return toReturn;
 
         } catch (SQLException e) {
-            //todo
             return null;
         }
     }
 
+    /**
+     * Connects to database and loads ID of species
+     * which has passed {@link Breed} on its list.
+     *
+     * @param breed Selected {@link Breed}
+     * @return species id; -1 if breed is null; -2 in case of SQLException
+     * -3 if query didn't return any value
+     */
     public int getSpeciesIdForBreed(Breed breed) {
         if (breed == null) {
             return -1;
@@ -129,6 +164,12 @@ public class BreedDatabase {
         }
     }
 
+    /**
+     * Connects to database and counts number of records in BREEDS table.
+     *
+     * @return Number of breeds in database. -1 in case of SQLException;
+     *  -2 if query didn't return any value
+     */
     public int countAllBreeds() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -141,11 +182,16 @@ public class BreedDatabase {
             }
 
         } catch (SQLException e) {
-            //todo
             return -1;
         }
     }
 
+    /**
+     * Connects to database and loads ID of last record in BREEDS table.
+     *
+     * @return ID of last breed; -1 in case of SQLException
+     *  -2 if query didn't return any value
+     */
     private int getLastUsedId() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -158,12 +204,18 @@ public class BreedDatabase {
             }
 
         } catch (SQLException e) {
-            //todo
             return -1;
         }
     }
 
-    private boolean addBreedToDatabase(Breed breed, int speciesId) {
+    /**
+     * Method connects to database and
+     * inserts passed {@link Breed} object into is.
+     * @param breed object to insert into database
+     * @param speciesId id of species to whom new breed belongs
+     * @return true if succeeded; false otherwise
+     */
+    private boolean insertNewBreed(Breed breed, int speciesId) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_NEW_BREED)) {
 
@@ -173,12 +225,19 @@ public class BreedDatabase {
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
-            //todo
             return false;
         }
     }
 
-
+    /**
+     * Checks if breed with passed name exists. If not adds new breed
+     * to database and connects it with passed species.
+     * @param species {@link Species} to whom new breed belongs
+     * @param name New breed's name
+     * @param requiresWalk Does animals of new breed require to be walked out.
+     * @return true if there was not such breed and new object was added successful;
+     *  false otherwise
+     */
     public boolean addBreedToSpecies(Species species, String name, boolean requiresWalk) {
         if (species.getBreeds()
                 .stream()
@@ -190,9 +249,16 @@ public class BreedDatabase {
         Breed toAdd = new Breed(name, requiresWalk, ++lastUsedId);
 
         return species.getBreeds().add(toAdd)
-                && addBreedToDatabase(toAdd, species.getId());
+                && insertNewBreed(toAdd, species.getId());
     }
 
+    /**
+     * Method search for {@link Breed} object with ID as passed.
+     *
+     * @param id ID to search for
+     * @return Object with passed id; null if query didn't return any result, SQLException
+     * or problem with Stream
+     */
     public Breed getBreedViaId(int id) {
         int speciesId;
 
@@ -210,7 +276,6 @@ public class BreedDatabase {
             }
 
         } catch (SQLException e) {
-            //todo
             return null;
         }
 
@@ -227,6 +292,16 @@ public class BreedDatabase {
         }
     }
 
+    /**
+     * Sets selected {@link Breed} field to value passed as parameter.
+     * Value can be the same as before
+     *
+     * @param breed Selected {@link Breed}
+     * @param doesRequireWalk New value of {@link Breed#requireWalk}
+     * @return true if succeeded; false otherwise
+     *
+     * @see #updateExistingBreed(boolean, int)
+     */
     public boolean editBreed(Breed breed, boolean doesRequireWalk) {
         if (updateExistingBreed(doesRequireWalk, breed.getId())) {
             breed.setRequireWalk(doesRequireWalk);
@@ -235,6 +310,14 @@ public class BreedDatabase {
         return false;
     }
 
+    /**
+     * Connects to database and edits record from table BREEDS
+     * with ID as passed
+     * @param requiresWalk new value of {@link Breed#requireWalk}
+     * @param id ID of edited breed
+     * @return true if succeeded; false otherwise
+     * @see #editBreed(Breed, boolean)
+     */
     private boolean updateExistingBreed(boolean requiresWalk, int id) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_BREED)) {

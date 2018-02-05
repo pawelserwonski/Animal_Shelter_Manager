@@ -13,7 +13,14 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 
-
+/**
+ * AnimalDatabase represents part of database which is
+ * responsible for keeping list of animals being in shelter.
+ *
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class AnimalDatabase {
     public static final String SELECT_ALL_ANIMALS_FROM_DATABASE = "SELECT * FROM " + Database.TABLE_ANIMALS;
 
@@ -59,17 +66,35 @@ public class AnimalDatabase {
             + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_ID
             + " WHERE " + Database.TABLE_BREEDS + "." + Database.BREEDS_COLUMN_SPECIES + " = ?";
 
+    /**
+     * Singleton instance of class.
+     */
     private static AnimalDatabase instance = new AnimalDatabase();
+
+    /**
+     * Last (highest number) used ID in database.
+     */
     private int lastUsedId;
+
+    /**
+     * List of all animals in shelter.
+     */
     private ObservableList<Animal> animals;
 
-
+    /**
+     * Class constructor.
+     */
     private AnimalDatabase() {
         animals = FXCollections.observableList(getAllAnimalsFromDatabase());
         lastUsedId = getLastAnimalId();
     }
 
-
+    /**
+     * Method connects to database and loads every record from ANIMALS table.
+     * Each record from database is then used to create one {@link Animal} object.
+     *
+     * @return List of {@link Animal} objects loaded from database.
+     */
     public static List<Animal> getAllAnimalsFromDatabase() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -111,6 +136,12 @@ public class AnimalDatabase {
         }
     }
 
+    /**
+     * Method connects to database and count how many
+     * animals of specified species are currently in database.
+     * @param speciesId ID of species in database
+     * @return Number of animals of specified species.
+     */
     public static int countAnimalOfSpecifiedSpecies(int speciesId) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(COUNT_ANIMALS_OF_SPECIFIED_SPECIES)) {
@@ -127,6 +158,14 @@ public class AnimalDatabase {
         }
     }
 
+    /**
+     * Method connects to database and loads record(s) representing animal(s) of selected species
+     * from ANIMALS table.
+     * Each record from database is then used to create one {@link Animal} object.
+     *
+     * @param species Selected species
+     * @return List of {@link Animal} objects loaded from database.
+     */
     public static List<Animal> getAnimalsOfSpecifiedSpecies(Species species) {
         ResultSet resultSet = null;
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
@@ -179,6 +218,14 @@ public class AnimalDatabase {
         }
     }
 
+    /**
+     * Method connects to database and loads record(s) representing animals of selected breed
+     * from ANIMALS table.
+     * Every record from database is then used to create one {@link Animal} object.
+     *
+     * @param breed Selected breed
+     * @return List of {@link Animal} objects loaded from database.
+     */
     public static List<Animal> getAnimalsOfSpecifiedBreed(Breed breed) {
         ResultSet resultSet = null;
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
@@ -192,7 +239,6 @@ public class AnimalDatabase {
             if (resultSet.next()) {
 
                 int idColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_ID);
-//                int breedColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BREED);
                 int nameColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_NAME);
                 int sexColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_SEX);
                 int birthDateColumn = resultSet.findColumn(Database.ANIMALS_COLUMN_BIRTHDATE);
@@ -201,8 +247,6 @@ public class AnimalDatabase {
 
                 do {
                     int id = resultSet.getInt(idColumn);
-//                    int breedId = resultSet.getInt(breedColumn);
-//                    Breed breed = BreedDatabase.getInstance().getBreedViaId(breedId);
                     String name = resultSet.getString(nameColumn);
                     Animal.Sex sex = Animal.Sex.getSexFromString(resultSet.getString(sexColumn));
                     LocalDate birthDate = LocalDate.parse(resultSet.getString(birthDateColumn));
@@ -220,7 +264,6 @@ public class AnimalDatabase {
             return toReturn;
 
         } catch (SQLException e) {
-            //todo
             return new LinkedList<>();
         } finally {
             try {
@@ -236,6 +279,12 @@ public class AnimalDatabase {
         return instance;
     }
 
+    /**
+     * Method connects to database and
+     * inserts passed {@link Animal} object into is.
+     * @param animal {@link Animal} object to insert into database.
+     * @return true if succeeded; false otherwise
+     */
     private boolean insertNewAnimal(Animal animal) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement =
@@ -254,11 +303,21 @@ public class AnimalDatabase {
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
-            //todo
             return false;
         }
     }
 
+    /**
+     * Sets passed {@link Animal} object's fields to new values.
+     * Passed values can be the same as they were before.
+     *
+     * @param animal {@link Animal} object which fields are to be changed
+     * @param updatedBreed New value of {@link Animal#breed} field
+     * @param updatedName New value of {@link Animal#name} field
+     * @param updatedSex New value of {@link Animal#sex} field
+     * @param updatedBirthDate New value of {@link Animal#birthDate} field
+     * @return true if succeeded; false otherwise
+     */
     public boolean editAnimal(Animal animal, Breed updatedBreed, String updatedName,
                               Animal.Sex updatedSex, LocalDate updatedBirthDate) {
         if (animal != null && updateExistingAnimalInDatabase(animal.getId(),
@@ -270,11 +329,21 @@ public class AnimalDatabase {
 
             return true;
         }
-
         return false;
     }
 
-    private boolean updateExistingAnimalInDatabase(int updatesAnimalsId, Breed updatedBreed,
+    /**
+     * Connects to database and sets record with passed ID to new values.
+     * Values can be the same as they were before
+     *
+     * @param updatedAnimalsId Selected record ID.
+     * @param updatedBreed New value of Breed's ID
+     * @param updatedName New value of name.
+     * @param updatedSex New value of {@link Animal#sex} enum (toString)
+     * @param updatedDate New value of {@link Animal#birthDate}
+     * @return true if succeeded; false otherwise
+     */
+    private boolean updateExistingAnimalInDatabase(int updatedAnimalsId, Breed updatedBreed,
                                                    String updatedName, Animal.Sex updatedSex, LocalDate updatedDate) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_EXISTING_ANIMAL)) {
@@ -283,15 +352,19 @@ public class AnimalDatabase {
             preparedStatement.setString(2, updatedName);
             preparedStatement.setString(3, updatedSex.toString());
             preparedStatement.setString(4, updatedDate.toString());
-            preparedStatement.setInt(5, updatesAnimalsId);
+            preparedStatement.setInt(5, updatedAnimalsId);
 
             return preparedStatement.executeUpdate() == 1;
         } catch (SQLException e) {
-            //todo
             return false;
         }
     }
 
+    /**
+     * Deletes animal from database.
+     * @param animalToDelete {@link Animal} object which is to be deleted.
+     * @return true if succeeded; false otherwise
+     */
     public boolean deleteAnimal(Animal animalToDelete) {
         if (animalToDelete != null && removeAnimalFromDatabase(animalToDelete)) {
             animals.remove(animalToDelete);
@@ -301,6 +374,13 @@ public class AnimalDatabase {
         }
     }
 
+    /**
+     * Connects to database and removes record containing information about passed
+     * {@link Animal} object.
+     *
+     * @param animalToRemove {@link Animal} object which is to be deleted.
+     * @return true if succeeded; false otherwise
+     */
     private boolean removeAnimalFromDatabase(Animal animalToRemove) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_ANIMAL)) {
@@ -314,6 +394,11 @@ public class AnimalDatabase {
         }
     }
 
+    /**
+     * Sets {@link Animal#lastWalk} to current date.
+     * @param animal Selected {@link Animal} object
+     * @return true if animal requires to be walked out and operation succeeded; false otherwise
+     */
     public boolean walkOutAnimal(Animal animal) {
         LocalDate newDate = LocalDate.now();
         if (animal.getBreed().doesRequireWalk() && updateLaskWalkDate(newDate, animal)) {
@@ -324,6 +409,14 @@ public class AnimalDatabase {
         return false;
     }
 
+    /**
+     * Connects to database and updates date of last walk in record containing info about
+     * passed {@link Animal} object.
+     *
+     * @param updatedDate New value of date
+     * @param walkedAnimal Selected {@link Animal} object
+     * @return true if succeeded; false otherwise
+     */
     private boolean updateLaskWalkDate(LocalDate updatedDate, Animal walkedAnimal) {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_LAST_WALK)) {
@@ -339,6 +432,11 @@ public class AnimalDatabase {
         }
     }
 
+    /**
+     * Connects to database and counts number of records in ANIMALS table.
+     *
+     * @return Number of animals in database. -1 in case of SQLException
+     */
     public int countAnimals() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -351,11 +449,15 @@ public class AnimalDatabase {
             }
 
         } catch (SQLException e) {
-            //todo -- handle SQLException
             return -1;
         }
     }
 
+    /**
+     * Connects to database and loads ID of last record in ANIMALS table.
+     *
+     * @return ID of last animal; -1 in case of SQLException
+     */
     public int getLastAnimalId() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
@@ -367,7 +469,6 @@ public class AnimalDatabase {
                 return -2;
             }
         } catch (SQLException e) {
-            //TODO
             return -1;
         }
     }
@@ -377,6 +478,17 @@ public class AnimalDatabase {
         return animals;
     }
 
+
+    /**
+     * Creates new {@link Animal} object and adds it to database.
+     *
+     * @param sex New animal's {@link ski.serwon.AnimalShelterManager.model.Animal.Sex}
+     * @param name New animal's {@link Animal#name}
+     * @param birthDate New animal's {@link Animal#birthDate}
+     * @param breed New animal's {@link Breed}
+     * @return true if adding to database succeeded; false otherwise
+     * @throws NoEmptySpacesException if all places for specified species are occupied
+     */
     public boolean addAnimal(Animal.Sex sex, String name, LocalDate birthDate, Breed breed)
     throws NoEmptySpacesException{
         Species species = SpeciesDatabase.getInstance().getSpeciesById

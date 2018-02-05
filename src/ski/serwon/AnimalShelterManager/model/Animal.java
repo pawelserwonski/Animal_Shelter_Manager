@@ -4,7 +4,17 @@ import java.time.LocalDate;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+/**
+ * Class represents single animal in shelter.
+ *
+ * @version 1.0
+ * @since 1.0
+ */
 public class Animal {
+
+    /**
+     * Enumerator representing sex of certain animal.
+     */
     public enum Sex{male, female;
 
         @Override
@@ -19,32 +29,58 @@ public class Animal {
         public String getFullNameOfSex() { return this.equals(male) ? "Male" : "Female";}
     }
 
+    /**
+     * Animal's {@link Sex}
+     */
     private Sex sex;
-    //private Species species;
+
+    /**
+     * Animal's name
+     */
     private String name;
+
+    /**
+     * Animal's date of birth.
+     * @see LocalDate
+     */
     private LocalDate birthDate;
+
+    /**
+     * Date since when the animal is in the shelter.
+     * @see LocalDate
+     */
     private LocalDate inShelterSince;
+
+    /**
+     * Animal's {@link Breed}
+     */
     private Breed breed;
+
+    /**
+     * Date when animal was walked out for the last time
+     * (only if {@link Breed#requireWalk} == true)
+     */
     private LocalDate lastWalk;
+
+    /**
+     * Animal's ID in database
+     */
     private int id;
 
-
-
-//    public Animal(/*Species species, */String name, LocalDate birthDate, Breed breed, Sex sex) {
-////        this.species = species;
-//        this.name = name;
-//        this.birthDate = birthDate;
-//        this.breed = breed;
-//        this.sex = sex;
-//
-//        this.inShelterSince = LocalDate.now();
-//        if (breed.doesRequireWalk()) lastWalk = LocalDate.now();
-//        //id = lastId++;
-//    }
-
-    public Animal(Sex sex, /*Species species,*/ String name, LocalDate birthDate, LocalDate inShelterSince, Breed breed, LocalDate lastWalk, int id) {
+    /**
+     * Class constructor.
+     * @param sex Animal's {@link Sex}
+     * @param name Animal's name
+     * @param birthDate Animal's date of birth.
+     * @param inShelterSince Date since when the animal is in the shelter.
+     * @param breed Animal's {@link Breed}
+     * @param lastWalk Date when animal was walked out for the last time
+     *                 (necessary only if {@link Breed#requireWalk} == true)
+     * @param id Animal's ID in database
+     */
+    public Animal(Sex sex, String name, LocalDate birthDate, LocalDate inShelterSince,
+                  Breed breed, LocalDate lastWalk, int id) {
         this.sex = sex;
-//        this.species = species;
         this.name = name;
         this.birthDate = birthDate;
         this.inShelterSince = inShelterSince;
@@ -53,6 +89,11 @@ public class Animal {
         this.id = id;
     }
 
+    /**
+     * Method count how many days have passed since {@link #lastWalk}.
+     * @return Days since {@link #lastWalk}
+     * @throws WalkException if {@link Breed#requireWalk} == false
+     */
     public long daysSinceLastWalked() throws WalkException {
         if (breed.doesRequireWalk()) {
             return DAYS.between(lastWalk, LocalDate.now());

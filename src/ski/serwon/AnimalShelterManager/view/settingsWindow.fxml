@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<?import javafx.scene.control.Spinner?>
+<GridPane fx:id="settingsGridPane"
+          xmlns="http://javafx.com/javafx/8.0.121"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="ski.serwon.AnimalShelterManager.controller.SettingsWindowController">
+
+    <Label text="Threshold of warning (percent of free places):"
+           GridPane.columnIndex="0" GridPane.rowIndex="0">
+        <tooltip>
+            <Tooltip text="In case of less percentage of free places for any species warning will be shown"/>
+        </tooltip>
+    </Label>
+
+    <Spinner fx:id="thresholdWaringSpinner" GridPane.rowIndex="0" GridPane.columnIndex="1" minWidth="50"
+             min="1" initialValue="10" amountToStepBy="1" max="100" editable="true"/>
+
+</GridPane>
