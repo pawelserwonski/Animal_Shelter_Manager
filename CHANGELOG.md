@@ -1,4 +1,4 @@
-#CHANGELOG
+# CHANGELOG
 
 ## [0.9] - 2018-02-07
 ### ADDED
