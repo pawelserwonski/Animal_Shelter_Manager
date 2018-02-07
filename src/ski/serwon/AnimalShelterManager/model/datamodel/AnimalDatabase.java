@@ -435,7 +435,8 @@ public class AnimalDatabase {
     /**
      * Connects to database and counts number of records in ANIMALS table.
      *
-     * @return Number of animals in database. -1 in case of SQLException
+     * @return Number of animals in database. -1 in case of SQLException;
+     * -2 if query result failed
      */
     public int countAnimals() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
@@ -445,7 +446,7 @@ public class AnimalDatabase {
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             } else {
-                throw new SQLException("Query execution failed.");
+                return -2;
             }
 
         } catch (SQLException e) {
@@ -457,8 +458,9 @@ public class AnimalDatabase {
      * Connects to database and loads ID of last record in ANIMALS table.
      *
      * @return ID of last animal; -1 in case of SQLException
+     * or -2 if query result failed
      */
-    public int getLastAnimalId() {
+    private int getLastAnimalId() {
         try (Connection connection = DriverManager.getConnection(Database.CONNECTION_STRING);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(SELECT_MAX_USED_ID)) {

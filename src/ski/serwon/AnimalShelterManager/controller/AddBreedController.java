@@ -14,13 +14,19 @@ import java.time.LocalDate;
 public class AddBreedController {
     @FXML
     private TextField nameTextField;
-
     @FXML
     private RadioButton noRadioButton;
     @FXML
     private RadioButton yesRadioButton;
 
-
+    /**
+     * Handles adding new {@link Breed} object basing on
+     * values passed by user in controlled window.
+     *
+     * Shows warning if problems occurred.
+     *
+     * @param species {@link Species} object to whom new Breed should be assigned
+     */
     public void addNewBreed(Species species) {
         if (!noRadioButton.isSelected() && !yesRadioButton.isSelected()) {
             showWarning("Select option", "Select whether this " +
@@ -45,6 +51,11 @@ public class AddBreedController {
         }
     }
 
+    /**
+     * Fills fields in controlled window with values stored in passed {@link Breed} object.
+     *1
+     * @param breed Object to fill window with
+     */
     public void fillFieldsWithBreed(Breed breed) {
         nameTextField.setText(breed.getName());
         nameTextField.setEditable(false);
@@ -55,6 +66,12 @@ public class AddBreedController {
         }
     }
 
+    /**
+     * Handles setting new values in existing {@link Breed}
+     * object basing on values passed by user in controlled window.
+     *
+     * @param breed Edited breed
+     */
     public void editBreed(Breed breed) {
         if (!noRadioButton.isSelected() && !yesRadioButton.isSelected()) {
             showWarning("Select option", "Select whether this " +
@@ -80,6 +97,12 @@ public class AddBreedController {
         }
     }
 
+    /**
+     * Shows {@link Alert.AlertType#WARNING} alert
+     *
+     * @param title Title of new alert
+     * @param content Content of new alert
+     */
     private void showWarning(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);

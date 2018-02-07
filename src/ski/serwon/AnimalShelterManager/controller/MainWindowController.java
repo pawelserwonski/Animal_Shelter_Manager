@@ -1,6 +1,5 @@
 package ski.serwon.AnimalShelterManager.controller;
 
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -15,8 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -33,7 +30,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -238,7 +234,7 @@ public class MainWindowController {
         FXMLLoader fxmlLoader = new FXMLLoader();
         fxmlLoader.setLocation(getClass().getClassLoader().getResource("ski" + File.separator
                 + "serwon" + File.separator + "AnimalShelterManager" + File.separator
-                + "view" + File.separator + "addSpecies.fxml"));
+                + "view" + File.separator + "addEditSpecies.fxml"));
         try {
             dialog.getDialogPane().setContent(fxmlLoader.load());
         } catch (IOException e) {
@@ -256,7 +252,7 @@ public class MainWindowController {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             AddSpeciesController controller = fxmlLoader.getController();
-            Species newSpecies = controller.createSpecies();
+            Species newSpecies = controller.addSpecies();
             speciesListView.getSelectionModel().select(newSpecies);
         }
     }
@@ -301,7 +297,7 @@ public class MainWindowController {
         FXMLLoader fxmlLoader = new FXMLLoader();
         fxmlLoader.setLocation(getClass().getClassLoader().getResource("ski" + File.separator
                 + "serwon" + File.separator + "AnimalShelterManager" + File.separator
-                + "view" + File.separator + "addSpecies.fxml"));
+                + "view" + File.separator + "addEditSpecies.fxml"));
         try {
             dialog.getDialogPane().setContent(fxmlLoader.load());
         } catch (IOException e) {
@@ -322,7 +318,7 @@ public class MainWindowController {
 
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            controller.editPlacesLimit(selectedSpecies);
+            controller.editSpecies(selectedSpecies);
             speciesListView.refresh();
             populateSpeciesInfoLabels(selectedSpecies);
         }
@@ -345,7 +341,7 @@ public class MainWindowController {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getClassLoader().getResource("ski" + File.separator
                 + "serwon" + File.separator + "AnimalShelterManager" + File.separator
-                + "view" + File.separator + "addBreed.fxml"));
+                + "view" + File.separator + "addEditBreed.fxml"));
         try {
             dialog.getDialogPane().setContent(loader.load());
         } catch (IOException e) {
@@ -380,7 +376,7 @@ public class MainWindowController {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getClassLoader().getResource("ski" + File.separator
                 + "serwon" + File.separator + "AnimalShelterManager" + File.separator
-                + "view" + File.separator + "addBreed.fxml"));
+                + "view" + File.separator + "addEditBreed.fxml"));
         try {
             dialog.getDialogPane().setContent(loader.load());
         } catch (IOException e) {

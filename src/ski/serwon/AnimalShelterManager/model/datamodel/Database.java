@@ -3,7 +3,14 @@ package ski.serwon.AnimalShelterManager.model.datamodel;
 import java.io.File;
 import java.sql.Connection;
 
+/**
+ * Database is a set of Strings containing information necessary
+ * to communicate with database.
+ */
 public class Database {
+    /**
+     * Name of file containing database
+     */
     public static final String DB_NAME = "database.db";
     public static final String CONNECTION_STRING = "jdbc:sqlite:." + File.separator
             + "data" + File.separator + DB_NAME;

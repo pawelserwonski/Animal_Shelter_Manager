@@ -25,6 +25,9 @@ public class AddEditAnimalController {
     @FXML
     private RadioButton maleRadioButton;
 
+    /**
+     * Populates combo box with all species from {@link SpeciesDatabase}
+     */
     public void populateSpeciesComboBox() {
         speciesComboBox.setItems(SpeciesDatabase.getInstance().getSpeciesList());
         Callback cellFactory = new Callback<ListView<Species>, ListCell<Species>>() {
@@ -50,6 +53,9 @@ public class AddEditAnimalController {
         speciesComboBox.setCellFactory(cellFactory);
     }
 
+    /**
+     * Populates combo box with breeds basing on selected {@link Species} object.
+     */
     @FXML
     private void populateBreedComboBox() {
         breedComboBox.setItems(speciesComboBox.getValue().getBreeds());
@@ -75,6 +81,10 @@ public class AddEditAnimalController {
         breedComboBox.setCellFactory(cellFactory);
     }
 
+    /**
+     * Fills fields in controlled window with values stored in passed {@link Animal} object.
+     * @param  animal Object to fill window with
+     */
     public void fillFieldsWithAnimal(Animal animal) {
         int speciesId = BreedDatabase.getInstance().getSpeciesIdForBreed(animal.getBreed());
         if (speciesId < 0) {
@@ -108,6 +118,12 @@ public class AddEditAnimalController {
         }
     }
 
+    /**
+     * Handles setting new values in existing {@link Animal}
+     * object basing on values passed by user in controlled window.
+     *
+     * @param animal Edited animal
+     */
     public void editExistingAnimal(Animal animal) {
         if (!checkFields()) {
             return;
@@ -122,6 +138,12 @@ public class AddEditAnimalController {
 
     }
 
+    /**
+     * Handles adding new {@link Animal} object basing on
+     * values passed by user in controlled window.
+     *
+     * Shows warning if problems occurred.
+     */
     public void addNewAnimal() {
         if (!checkFields()) {
             return;
@@ -140,6 +162,13 @@ public class AddEditAnimalController {
 
     }
 
+    /**
+     * Shows {@link Alert.AlertType#ERROR} alert
+     *
+     * @param title Title of new alert
+     * @param content Content of new alert
+     */
+
     private void showError(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -147,6 +176,12 @@ public class AddEditAnimalController {
         alert.showAndWait();
     }
 
+    /**
+     * Shows {@link Alert.AlertType#WARNING} alert
+     *
+     * @param title Title of new alert
+     * @param content Content of new alert
+     */
     private void showWarning(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
@@ -154,6 +189,11 @@ public class AddEditAnimalController {
         alert.showAndWait();
     }
 
+    /**
+     * Checks if every field is filled.
+     *
+     * @return true if all fields are filled; false otherwise
+     */
     private boolean checkFields() {
         if (!femaleRadioButton.isSelected() && !maleRadioButton.isSelected()) {
             showWarning("Select sex", "Sex needs to be selected");

@@ -16,7 +16,14 @@ public class AddSpeciesController {
     @FXML
     private Spinner<Integer> placesLimitSpinner;
 
-    public Species createSpecies() {
+    /**
+     * Handles adding new {@link Species} object basing on
+     * values passed by user in controlled window.
+     *
+     *
+     * @return Created object
+     */
+    public Species addSpecies() {
         String name = nameTextField.getText();
         if (name.equals("")) {
             return null;
@@ -27,7 +34,12 @@ public class AddSpeciesController {
         return SpeciesDatabase.getInstance().addNewSpecies(name, limit);
     }
 
-
+    /**
+     * Fills fields in controlled window with values
+     * stored in passed {@link Species} object.
+     *
+     * @param species Object to fill window with
+     */
     public void fillFieldsWithSpecies(Species species) {
         nameTextField.setText(species.getName());
         nameTextField.setEditable(false);
@@ -35,7 +47,13 @@ public class AddSpeciesController {
         placesLimitSpinner.getValueFactory().setValue(species.getPlacesLimit());
     }
 
-    public void editPlacesLimit(Species species) {
+    /**
+     * Handles setting new values in existing {@link Species}
+     * object basing on values passed by user in controlled window.
+     *
+     * @param species Edited species
+     */
+    public void editSpecies(Species species) {
 
         boolean success = SpeciesDatabase.getInstance()
                 .changeSpeciesPlacesLimits
